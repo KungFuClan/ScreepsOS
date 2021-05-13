@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { ErrorMapper } from "utils/ErrorMapper";
 
 declare global {
