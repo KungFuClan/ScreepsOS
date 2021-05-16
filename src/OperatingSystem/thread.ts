@@ -15,6 +15,7 @@ export class Thread {
         this.process = process;
         this.fullName = `${process.name}:${name}`
         this.gen = fn.apply(this, args);
+        Object.freeze(this);
     }
 
     public get memory(): ProcessMemory {

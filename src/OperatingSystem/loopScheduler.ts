@@ -2,18 +2,22 @@ import * as _ from "lodash"
 
 import { Process } from "./process";
 import { StringMap } from "common/interfaces";
-import { Thread } from "./thread";
+import { Thread, ThreadMap } from "./thread";
 
 export interface LoopState {
     queue?: [string, Thread][]
     currentName?: string | null;
 }
 
-export type LoopScheduler = Generator<any,any,any>
+export type LoopScheduler = Generator<unknown,any,unknown>
 
-export function * loopScheduler (threads: Map<string, Thread>, limit: number, state: LoopState = {}): LoopScheduler {
+function createQueue(threads: ThreadMap): [string, Thread][] {
     // TODO Maybe swap this for a priority system
-    const queue = _.shuffle(Array.from(threads.entries()));
+    return _.shuffle(Array.from(threads.entries()));
+}
+
+export function * loopScheduler (threads: ThreadMap, limit: number, state: LoopState = {}): LoopScheduler {
+    const queue = createQueue(threads);
     state.queue = queue;
 
     const counts: StringMap<number> = {};

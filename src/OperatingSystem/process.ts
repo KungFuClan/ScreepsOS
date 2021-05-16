@@ -1,5 +1,4 @@
-import { Kernel, kernel  } from "./kernel";
-import { Thread } from "./thread";
+import { Kernel } from "./kernel";
 
 export interface ProcessMemory {
     temp?: string
@@ -15,11 +14,12 @@ export interface Process {
 export type ProcessMap = Map<string, Process>;
 
 export class Process {
-    public constructor(processName: string) {
+    public constructor(kernel: Kernel, processName: string) {
         this.kernel = kernel;
         this.name = processName;
         this.memory = {};
         this.threads = new Set<string>();
+        Object.freeze(this);
     }
 
     public createThread (threadName: string, fn: GeneratorFunction, ...args: any[]): void {
