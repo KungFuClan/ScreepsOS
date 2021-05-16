@@ -1,3 +1,4 @@
+import { GeneratorCreator } from "common/interfaces";
 import { Kernel } from "./kernel";
 
 export interface ProcessMemory {
@@ -22,7 +23,7 @@ export class Process {
         Object.freeze(this);
     }
 
-    public createThread (threadName: string, fn: GeneratorFunction, ...args: any[]): void {
+    public createThread (threadName: string, fn: GeneratorCreator, ...args: any[]): void {
         this.threads.add(threadName);
         return this.kernel.createThread(this.name, threadName, fn, ...args);
     }

@@ -1,3 +1,4 @@
+import { GeneratorCreator } from "common/interfaces";
 import { LoopScheduler, LoopState, loopScheduler } from "./loopScheduler";
 import { Process, ProcessMap } from "./process";
 import { Thread, ThreadMap } from "./thread";
@@ -28,7 +29,15 @@ export class Kernel {
         this.schedulerState = {};
         const scheduler = loopScheduler(this.threads, limit, this.schedulerState);
 
+
+        console.log("ticking kernel");
+
         for(const value of scheduler) {
+            // eslint-disable-next-line
+            console.log("SchedState: " + this.schedulerState);
+
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            console.log("Scheduler Value: " + value)
             if(typeof value === 'string') {
                 this.threads.delete(value);
             }
@@ -42,7 +51,7 @@ export class Kernel {
         }
     }
 
-    public createThread(processName: string, threadName: string, fn: GeneratorFunction, ...args: any[]): void {
+    public createThread(processName: string, threadName: string, fn: GeneratorCreator, ...args: any[]): void {
         const process = this.processes.get(processName);
         if(!process)
             throw new Error(`Tried creating thread ${threadName} for missing process ${processName}`);
@@ -70,7 +79,7 @@ export class Kernel {
         this.processes.set(processName, process);
     }
 
-    public createProcess(processName: string, fn: GeneratorFunction, ...args:any[]): void {
+    public createProcess(processName: string, fn: GeneratorCreator, ...args:any[]): void {
         const process = new Process(this, processName);
         this.addProcess(processName, process);
         process.createThread('main', fn, ...args);

@@ -3,6 +3,7 @@ import * as _ from "lodash"
 import { Process } from "./process";
 import { StringMap } from "common/interfaces";
 import { Thread, ThreadMap } from "./thread";
+import { STATUS_CODES } from "http";
 
 export interface LoopState {
     queue?: [string, Thread][]
@@ -13,12 +14,17 @@ export type LoopScheduler = Generator<unknown,any,unknown>
 
 function createQueue(threads: ThreadMap): [string, Thread][] {
     // TODO Maybe swap this for a priority system
-    return _.shuffle(Array.from(threads.entries()));
+    // return _.shuffle(Array.from(threads.entries()));
+    return Array.from(threads.entries());
 }
 
 export function * loopScheduler (threads: ThreadMap, limit: number, state: LoopState = {}): LoopScheduler {
     const queue = createQueue(threads);
     state.queue = queue;
+
+    for(const value of state.queue.entries()) {
+        console.log("Queue: " + value[1][0]);
+    }
 
     const counts: StringMap<number> = {};
     const cpu: StringMap<number> = {};
@@ -30,12 +36,18 @@ export function * loopScheduler (threads: ThreadMap, limit: number, state: LoopS
             const start = Game.cpu.getUsed();
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const {value, done} = item[1].next();
+            console.log(state.currentName + " Value: " + JSON.stringify(value));
+
+
             const duration = Game.cpu.getUsed() - start;
 
             counts[state.currentName] = counts[state.currentName] || 0;
             counts[state.currentName]++;
             cpu[state.currentName] = cpu[state.currentName] || 0;
             cpu[state.currentName] += duration;
+
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            console.log(`Done? ${done} : Value: ${value}`);
 
             if(!done && value === true) {
                 queue.push(item);
@@ -44,7 +56,7 @@ export function * loopScheduler (threads: ThreadMap, limit: number, state: LoopS
             if(done) {
                 threads.delete(state.currentName);
             }
-        } catch (err: any) {
+        } catch (err) {
             threads.delete(state.currentName);
             // eslint-disable-next-line
             console.log(`Error Running thread: ${state.currentName} ${err.stack || err.message || err}`)
@@ -76,7 +88,7 @@ export function * restartThread(this: Process | Thread, fn: GeneratorFunction, .
     while (true) {
         try {
             yield * fn.apply(this, args)
-        } catch (err: any) {
+        } catch (err) {
             // eslint-disable-next-line
             console.log(`Thread '${this.name}' exited with error: ${err.stack || err.message || err}`)
         }

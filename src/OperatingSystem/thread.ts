@@ -1,3 +1,4 @@
+import { GeneratorCreator } from "common/interfaces";
 import { Process, ProcessMemory } from "./process";
 
 export interface Thread {
@@ -10,7 +11,7 @@ export interface Thread {
 export type ThreadMap = Map<string, Thread>;
 
 export class Thread {
-    public constructor(process: Process, name: string, fn: GeneratorFunction, args = []) {
+    public constructor(process: Process, name: string, fn: GeneratorCreator, ...args: any[]) {
         this.name = "";
         this.process = process;
         this.fullName = `${process.name}:${name}`
