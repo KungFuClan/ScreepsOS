@@ -38,6 +38,7 @@ module.exports = {
         accessibility: "explicit"
       }
     ],
+    "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-parameter-properties": "off",
     "@typescript-eslint/no-unused-expressions": "error",
@@ -45,6 +46,7 @@ module.exports = {
     "@typescript-eslint/prefer-for-of": "error",
     "@typescript-eslint/space-within-parens": ["off", "never"],
     "@typescript-eslint/unified-signatures": "error",
+    "@typescript-eslint/unbound-method": "off",
     "arrow-parens": ["off", "as-needed"],
     camelcase: "error",
     complexity: "off",
@@ -62,6 +64,7 @@ module.exports = {
     "no-caller": "error",
     "no-cond-assign": "error",
     "no-console": "off",
+    "no-constant-condition": "off",
     "no-eval": "error",
     "no-invalid-this": "off",
     "no-multiple-empty-lines": "off",

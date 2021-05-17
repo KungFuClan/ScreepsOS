@@ -27,8 +27,8 @@ export class Kernel {
         if (Game.cpu.bucket < this.MIN_BUCKET) return;
         const { value: limit = 0 } = this.pidGen.next();
         this.schedulerState = {};
-        const scheduler = loopScheduler(this.threads, limit, this.schedulerState);
 
+        const scheduler = loopScheduler(this.threads, limit, this.schedulerState);
 
         console.log("ticking kernel");
 

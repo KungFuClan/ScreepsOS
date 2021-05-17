@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import { genTest123 } from "generatorTest";
 import { kernel } from "OperatingSystem/kernel";
+import { runSpawns } from "Spawn/exampleSpawn";
 import { ErrorMapper } from "utils/ErrorMapper";
 
 declare global {
@@ -49,8 +50,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
     kernel.createThread("genTest", "restarted", genTest123, []);
   }
 
+  // runSpawns.createProcess();
+
   //* Just call this once per tick, iterates through the entire queue based on this. Can also create multiple queues and multiple runs if needed.
   kernel.tick();
+
   // const newGen = genTest123();
   // console.log(newGen.next().value);
   // console.log(newGen.next().value);

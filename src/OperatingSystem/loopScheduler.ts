@@ -1,9 +1,8 @@
 import * as _ from "lodash"
 
+import { Thread, ThreadMap } from "./thread";
 import { Process } from "./process";
 import { StringMap } from "common/interfaces";
-import { Thread, ThreadMap } from "./thread";
-import { STATUS_CODES } from "http";
 
 export interface LoopState {
     queue?: [string, Thread][]
