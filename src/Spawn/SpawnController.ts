@@ -1,40 +1,41 @@
 import { IController } from 'common/interfaces';
+import { Process } from 'OperatingSystem/process';
 import { kernel } from 'OperatingSystem/kernel';
 import { sleep  } from 'OperatingSystem/loopScheduler';
-import { Process } from 'OperatingSystem/process';
-import { spawnQueueService } from './SpawnQueueService';
+import { SpawnQueueService, spawnQueueService } from './SpawnQueueService';
 
-export class SpawnController implements IController {
+export class SpawnController extends IController {
 
-    public processName = 'spawnController';
+    public static processName = 'spawnController';
 
-    public process: Process | undefined = undefined;
-
-    public spawnQueue = [];
-
-    public createProcess(): void {
-
-        if(!kernel.hasProcess(this.processName)) {
-            //* Create the main thread
-            kernel.createProcess(this.processName, this.runMain, []);
-        }
-
-        this.process = kernel.processes.get(this.processName);
+    public static createProcess(): void {
+        kernel.createProcess(this.processName, this.runMain.bind(this), []);
     }
 
-    public * runMain(): Generator<unknown,any,unknown> {
+    public static * runMain(): Generator<unknown,any,unknown> {
+
         while(true) {
 
-            if(!this.process?.hasThread('queueManager')) {
-                this.process?.createThread('queueManager', spawnQueueService.run, [this.process]);
+            let process = kernel.processes.get(this.processName);
+
+            if(process === undefined) {
+                process = kernel.processes.get(this.processName);
+                yield;
+                continue;
             }
 
-            yield * sleep(10);
+            if(!process.hasThread('queueManager')) {
+                process.createThread('queueManager', SpawnQueueService.run, [process]);
+            }
+
+            yield "Main thread run";
+
+            // yield * sleep(10);
 
         }
     }
 
-    public * runRoom(roomName: string): Generator<unknown,any,unknown> {
+    public static * runRoom(roomName: string): Generator<unknown,any,unknown> {
 
         if(Game.rooms[roomName] === undefined) {
             console.log("RunSpawns could not find room " + roomName + ", destroying thread.");
@@ -43,6 +44,7 @@ export class SpawnController implements IController {
 
         while(true) {
 
+            // TODO use repo
             const spawns = Game.rooms[roomName].find(FIND_MY_SPAWNS);
 
             if(spawns.length <= 0) {

@@ -1,6 +1,8 @@
 import { IService } from "common/interfaces";
+import { object } from "lodash";
 import { kernel } from "OperatingSystem/kernel";
 import { Process } from "OperatingSystem/process";
+import { Thread } from "OperatingSystem/thread";
 import { EmpireRepo } from "Repositories/EmpireRepo";
 
 export interface spawnQueueObject {
@@ -9,21 +11,22 @@ export interface spawnQueueObject {
     validator: (...args: any) => boolean
 }
 
-export class SpawnQueueService implements IService{
+export class SpawnQueueService extends IService{
 
-    public spawnQueue: Set<spawnQueueObject>;
+    public static spawnQueue = new Set<spawnQueueObject>();
 
-    public constructor() {
-        this.spawnQueue = new Set();
-    }
-
-    public * run(process: Process): Generator<unknown, any, unknown> {
+    public static * run(this: Thread): Generator<unknown, any, unknown> {
 
         const ownedRooms = EmpireRepo.getRooms_My();
 
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        console.log("This of SpawnQueue: " + Object.keys(this));
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        console.log("This.process: " + Object.keys(this.process));
+
         for(const room of ownedRooms) {
-            if(!process.hasThread(room.name)) {
-                process.createThread(room.name, this.runRoom, {process, roomName: room.name});
+            if(!this.process.hasThread(room.name)) {
+                this.process.createThread(room.name, SpawnQueueService.runRoom, {process: this.process, roomName: room.name});
             }
         }
 
@@ -38,7 +41,7 @@ export class SpawnQueueService implements IService{
 
     }
 
-    public * runRoom(process: Process, roomName: string): Generator<unknown, any, unknown> {
+    public static * runRoom(process: Process, roomName: string): Generator<unknown, any, unknown> {
         while(true) {
             yield "Run Room SpawnQueue: " + roomName;
         }

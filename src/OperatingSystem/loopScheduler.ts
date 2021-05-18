@@ -45,9 +45,6 @@ export function * loopScheduler (threads: ThreadMap, limit: number, state: LoopS
             cpu[state.currentName] = cpu[state.currentName] || 0;
             cpu[state.currentName] += duration;
 
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            console.log(`Done? ${done} : Value: ${value}`);
-
             if(!done && value === true) {
                 queue.push(item);
             }
