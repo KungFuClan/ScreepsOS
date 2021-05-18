@@ -1,12 +1,16 @@
-import { Controller } from 'common/interfaces';
+import { IController } from 'common/interfaces';
 import { kernel } from 'OperatingSystem/kernel';
-import { sleep } from 'OperatingSystem/loopScheduler';
+import { sleep  } from 'OperatingSystem/loopScheduler';
+import { Process } from 'OperatingSystem/process';
+import { spawnQueueService } from './SpawnQueueService';
 
-export class SpawnController implements Controller {
-
-
+export class SpawnController implements IController {
 
     public processName = 'spawnController';
+
+    public process: Process | undefined = undefined;
+
+    public spawnQueue = [];
 
     public createProcess(): void {
 
@@ -14,19 +18,15 @@ export class SpawnController implements Controller {
             //* Create the main thread
             kernel.createProcess(this.processName, this.runMain, []);
         }
+
+        this.process = kernel.processes.get(this.processName);
     }
 
     public * runMain(): Generator<unknown,any,unknown> {
         while(true) {
 
-            // TODO Get the list of rooms from somewhere
-            const ownedRooms = ["W12S14", "E24N13"];
-
-            for(const room of ownedRooms) {
-                if(!kernel.hasThread(`${this.processName}:${room}`)){
-                    kernel.createThread(this.processName, room, this.runRoom, {roomName: room});
-                    yield;
-                }
+            if(!this.process?.hasThread('queueManager')) {
+                this.process?.createThread('queueManager', spawnQueueService.run, [this.process]);
             }
 
             yield * sleep(10);
@@ -47,17 +47,9 @@ export class SpawnController implements Controller {
 
             if(spawns.length <= 0) {
                 console.log(`${roomName} does not have any active spawns.`);
-
+                yield * sleep(5);
+                continue;
             }
-
-            const spawnQueue = getQueueForRoom();
-
-            for(const spawn of spawnQueue) {
-                // do something with spawn
-                yield;
-            }
-            // Do stuff
-            yield;
 
         }
 
