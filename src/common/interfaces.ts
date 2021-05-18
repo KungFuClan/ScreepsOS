@@ -12,8 +12,8 @@ export type GeneratorCreator = (...args: any[]) => Generator;
 // }
 
 export abstract class IController {
-    public static processName: string;
-    public static runMain: GeneratorCreator;
+    public abstract processName: string;
+    public abstract runMain(): GeneratorCreator;
 }
 
 // export interface IService {
@@ -21,5 +21,5 @@ export abstract class IController {
 // }
 
 export abstract class IService {
-    public static run: GeneratorCreator
+    public abstract run(): GeneratorCreator;
 }
