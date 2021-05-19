@@ -1,8 +1,6 @@
 import { IController } from 'common/interfaces';
-import { Process } from 'OperatingSystem/process';
 import { kernel } from 'OperatingSystem/kernel';
-import { sleep  } from 'OperatingSystem/loopScheduler';
-import { SpawnQueueService, spawnQueueService } from './SpawnQueueService';
+import { SpawnQueueService } from './SpawnQueueService';
 
 export class SpawnController extends IController {
 
@@ -37,23 +35,7 @@ export class SpawnController extends IController {
 
     public static * runRoom(roomName: string): Generator<unknown,any,unknown> {
 
-        if(Game.rooms[roomName] === undefined) {
-            console.log("RunSpawns could not find room " + roomName + ", destroying thread.");
-            return;
-        }
-
-        while(true) {
-
-            // TODO use repo
-            const spawns = Game.rooms[roomName].find(FIND_MY_SPAWNS);
-
-            if(spawns.length <= 0) {
-                console.log(`${roomName} does not have any active spawns.`);
-                yield * sleep(5);
-                continue;
-            }
-
-        }
+        yield;
 
     }
 }

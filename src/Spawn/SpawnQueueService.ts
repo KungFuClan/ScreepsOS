@@ -1,9 +1,7 @@
+import { EmpireRepo } from "Repositories/EmpireRepo";
 import { IService } from "common/interfaces";
-import { object } from "lodash";
-import { kernel } from "OperatingSystem/kernel";
 import { Process } from "OperatingSystem/process";
 import { Thread } from "OperatingSystem/thread";
-import { EmpireRepo } from "Repositories/EmpireRepo";
 
 export interface spawnQueueObject {
     creepRole: string,
@@ -18,11 +16,6 @@ export class SpawnQueueService extends IService{
     public static * run(this: Thread): Generator<unknown, any, unknown> {
 
         const ownedRooms = EmpireRepo.getRooms_My();
-
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        console.log("This of SpawnQueue: " + Object.keys(this));
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        console.log("This.process: " + Object.keys(this.process));
 
         for(const room of ownedRooms) {
             if(!this.process.hasThread(room.name)) {
