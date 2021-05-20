@@ -1,22 +1,22 @@
 import { IController } from "common/interfaces";
-import { Process } from 'OperatingSystem/process';
 import { kernel } from 'OperatingSystem/kernel';
-import { sleep  } from 'OperatingSystem/loopScheduler';
+import { Thread } from "OperatingSystem/thread";
 
 export class CreepController implements IController {
 
-    public processName = 'creepController'
-    public process: Process | undefined = undefined;
+    public static processName = 'creepController'
 
-    public createProcess() {
-        if(!kernel.hasProcess(this.processName)) {
-            //* Create the main thread
-            kernel.createProcess(this.processName, this.runMain, []);
-        }
-        this.process = kernel.processes.get(this.processName);
+    public static createProcess(): void {
+        kernel.createProcess(this.processName, CreepController.runMain, {});
     }
 
-    public * runMain(): Generator<unknown,any,unknown> {
+    public static * runMain(this: Thread<any>): Generator<unknown,any,unknown>  {
+        while(true) {
+            // get my creeps -> civilian filter -> repo
+            // loop over creeps
+            // create thread assigned to creep service -> runCivCreeps
 
+            yield "Running Creeps Completed";
+        }
     }
 }
