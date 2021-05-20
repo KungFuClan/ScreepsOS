@@ -1,7 +1,6 @@
 import { EmpireRepo } from "Repositories/EmpireRepo";
 import { IService } from "common/interfaces";
 import { Thread } from "OperatingSystem/thread";
-import { kernel } from "OperatingSystem/kernel";
 import { sleep } from "OperatingSystem/loopScheduler";
 import { Process } from "OperatingSystem/process";
 
