@@ -1,18 +1,18 @@
-import { GeneratorCreator } from "common/interfaces";
 import { Process, ProcessMemory } from "./process";
+import { GeneratorCreator } from "common/interfaces";
 
-export interface Thread {
-    name: string,
-    process: Process,
-    fullName: string,
-    gen: Generator<any, any, any>
-}
+export type ThreadMap<ParamType> = Map<string, Thread<ParamType> >;
 
-export type ThreadMap = Map<string, Thread>;
+export class Thread<ParamType> {
 
-export class Thread {
-    public constructor(process: Process, name: string, fn: GeneratorCreator, ...args: any[]) {
-        this.name = "";
+    public threadName: string;
+    public process: Process;
+    public fullName: string;
+    public gen: Generator<unknown, any, unknown>;
+
+    public constructor(process: Process, name: string, fn: GeneratorCreator, argObj: ParamType) {
+        const args = Object.values(argObj).length > 0 ? _.values(argObj) : [];
+        this.threadName = "";
         this.process = process;
         this.fullName = `${process.name}:${name}`
         this.gen = fn.apply(this, args);
@@ -27,10 +27,10 @@ export class Thread {
         return this.gen.next();
     }
 
-    public [Symbol.iterator](): Thread { return this }
+    public [Symbol.iterator](): Thread<ParamType> { return this }
 
-    public createThread (threadName: string, fn: GeneratorFunction, ...args: any[]): void {
-        return this.process.createThread(threadName, fn, ...args);
+    public createThread<ParamType>(threadName: string, fn: GeneratorFunction, argObj: ParamType): void {
+        return this.process.createThread(threadName, fn, argObj);
     }
 
     public destroyThread (threadName: string): void {
