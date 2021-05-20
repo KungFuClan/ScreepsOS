@@ -5,27 +5,25 @@ export interface ProcessMemory {
     temp?: string
 }
 
-export interface Process {
-    kernel: Kernel
-    name: string,
-    memory: ProcessMemory,
-    threads: Set<string>
-}
-
 export type ProcessMap = Map<string, Process>;
 
-export class Process {
+export class Process{
+
+    public kernel: Kernel;
+    public name: string;
+    public memory: ProcessMemory;
+    public threads: Set<string>;
+
     public constructor(kernel: Kernel, processName: string) {
         this.kernel = kernel;
         this.name = processName;
         this.memory = {};
         this.threads = new Set<string>();
-        Object.freeze(this);
     }
 
-    public createThread (threadName: string, fn: GeneratorCreator, ...args: any[]): void {
+    public createThread<ParamType = any>(threadName: string, fn: GeneratorCreator, argObj: ParamType): void {
         this.threads.add(threadName);
-        return this.kernel.createThread(this.name, threadName, fn, ...args);
+        return this.kernel.createThread<ParamType>(this.name, threadName, fn, argObj);
     }
 
     public destroyThread (threadName: string): void {

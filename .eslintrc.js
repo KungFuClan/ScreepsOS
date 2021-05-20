@@ -28,9 +28,9 @@ module.exports = {
     }
   },
   rules: {
-    "@typescript-eslint/array-type": "error",
+    "@typescript-eslint/array-type": "warn",
     "@typescript-eslint/consistent-type-assertions": "error",
-    "@typescript-eslint/consistent-type-definitions": "error",
+    "@typescript-eslint/consistent-type-definitions": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-member-accessibility": [
       "error",
@@ -38,6 +38,7 @@ module.exports = {
         accessibility: "explicit"
       }
     ],
+    "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-parameter-properties": "off",

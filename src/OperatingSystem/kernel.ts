@@ -3,22 +3,20 @@ import { LoopScheduler, LoopState, loopScheduler } from "./loopScheduler";
 import { Process, ProcessMap } from "./process";
 import { Thread, ThreadMap } from "./thread";
 
-
-export interface Kernel {
-    threads: ThreadMap,
-    processes: ProcessMap,
-    pidGen: Generator<number, number, void>,
-    startTick: number,
-    schedulerState: LoopState
-}
-
 export class Kernel {
 
+    public threads: ThreadMap<any>;
+    public processes: ProcessMap;
+    public pidGen: Generator<number, number, void>;
+    public startTick: number;
+    public schedulerState: LoopState;
+
     public constructor() {
-        this.threads = new Map<string, Thread>();
+        this.threads = new Map<string, Thread<any>>();
         this.processes = new Map<string, Process>();
         this.pidGen = calcCPUPID();
         this.startTick = Game.time;
+        this.schedulerState = {};
     }
 
     private MIN_BUCKET = 1000;
@@ -30,14 +28,9 @@ export class Kernel {
 
         const scheduler = loopScheduler(this.threads, limit, this.schedulerState);
 
-        console.log("ticking kernel");
+        console.log(`Kernel has been up for: ${Game.time - this.startTick} ticks.`);
 
         for(const value of scheduler) {
-            // eslint-disable-next-line
-            console.log("SchedState: " + this.schedulerState);
-
-            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-            console.log("Scheduler Value: " + value)
             if(typeof value === 'string') {
                 this.threads.delete(value);
             }
@@ -51,11 +44,11 @@ export class Kernel {
         }
     }
 
-    public createThread(processName: string, threadName: string, fn: GeneratorCreator, ...args: any[]): void {
+    public createThread<ParamType>(processName: string, threadName: string, fn: GeneratorCreator, argObj: ParamType): void {
         const process = this.processes.get(processName);
         if(!process)
             throw new Error(`Tried creating thread ${threadName} for missing process ${processName}`);
-        const thread = new Thread(process, threadName, fn, ...args);
+        const thread = new Thread<ParamType>(process, threadName, fn, argObj);
         this.threads.set(thread.fullName, thread);
         if (this.schedulerState && this.schedulerState.queue) {
             this.schedulerState.queue.push([thread.fullName, thread]);
@@ -67,7 +60,6 @@ export class Kernel {
     }
 
     public destroyThread (threadName: string): boolean {
-        // const thread = this.threads.get(threadName)
         return this.threads.delete(threadName)
     }
 
@@ -79,10 +71,10 @@ export class Kernel {
         this.processes.set(processName, process);
     }
 
-    public createProcess(processName: string, fn: GeneratorCreator, ...args:any[]): void {
+    public createProcess<ParamType = Record<string, unknown>>(processName: string, fn: GeneratorCreator, argsObj: ParamType): void {
         const process = new Process(this, processName);
         this.addProcess(processName, process);
-        process.createThread('main', fn, ...args);
+        process.createThread('main', fn, argsObj);
     }
 
     public destroyProcess (processName: string): boolean {

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { genTest123 } from "generatorTest";
-import { kernel } from "OperatingSystem/kernel";
-import { runSpawns } from "Spawn/exampleSpawn";
 import { ErrorMapper } from "utils/ErrorMapper";
+import { SpawnController } from "Spawn/SpawnController";
+import { kernel } from "OperatingSystem/kernel";
 
 declare global {
   /*
@@ -33,41 +32,15 @@ declare global {
   }
 }
 
+// ! Create each controller at the beginning of a global reset - kernel should already exist
+SpawnController.createProcess();
+
+
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
-  console.log(`Current game tick is ${Game.time}`);
-
-  //* Check if the process exists yet, if not start it
-  // ! Do not start a process every tick, as it will override the existing one each tick - no iteration
-  if(!kernel.hasProcess("genTest")) {
-      kernel.createProcess("genTest", genTest123, []);
-  }
-
-  //* Normally this would just restart same thread - renamed thread for clarity of demonstration
-  // ! Don't start thread every tick, or it will overwrite the existing named one each tick - no iteration
-  if(!kernel.hasThread("genTest:main") && !kernel.hasThread("genTest:restarted")) {
-    kernel.createThread("genTest", "restarted", genTest123, []);
-  }
-
-  // runSpawns.createProcess();
 
   //* Just call this once per tick, iterates through the entire queue based on this. Can also create multiple queues and multiple runs if needed.
   kernel.tick();
 
-  // const newGen = genTest123();
-  // console.log(newGen.next().value);
-  // console.log(newGen.next().value);
-  // console.log(newGen.next().value);
-
-  // Automatically delete memory of missing creeps
-  for (const name in Memory.creeps) {
-    if (!(name in Game.creeps)) {
-      delete Memory.creeps[name];
-    }
-  }
-
-  if(Game.shard.name !== "sim"){
-    // Game.cpu.generatePixel();
-  }
 });

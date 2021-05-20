@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file */
+
 import { Process } from "OperatingSystem/process";
 
 export interface StringMap<T> {
@@ -6,13 +8,13 @@ export interface StringMap<T> {
 
 export type GeneratorCreator = (...args: any[]) => Generator;
 
-export interface IController {
-    processName: string,
-    process: Process | undefined,
-    createProcess: (...args: any[]) => void,
-    runMain: GeneratorCreator
+export abstract class IController {
+    public static processName: string;
+
+    public static runMain: GeneratorCreator
 }
 
-export interface IService {
-    run: GeneratorCreator
+export abstract class IService {
+    public static mainThreadName: string;
+    public static run: GeneratorCreator;
 }

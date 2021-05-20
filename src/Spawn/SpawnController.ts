@@ -1,55 +1,53 @@
 import { IController } from 'common/interfaces';
+import { SpawnQueueService } from './SpawnQueueService';
 import { kernel } from 'OperatingSystem/kernel';
-import { sleep  } from 'OperatingSystem/loopScheduler';
-import { Process } from 'OperatingSystem/process';
-import { spawnQueueService } from './SpawnQueueService';
+import { Thread } from 'OperatingSystem/thread';
+import { EmpireRepo } from 'Repositories/EmpireRepo';
+import { sleep } from 'OperatingSystem/loopScheduler';
 
-export class SpawnController implements IController {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SpawnControllerParams = {
+    roomName: string;
+}
 
-    public processName = 'spawnController';
+type runRoomParams = { roomName: string };
 
-    public process: Process | undefined = undefined;
+export class SpawnController extends IController {
 
-    public spawnQueue = [];
+    public static processName = 'spawnController';
 
-    public createProcess(): void {
-
-        if(!kernel.hasProcess(this.processName)) {
-            //* Create the main thread
-            kernel.createProcess(this.processName, this.runMain, []);
-        }
-
-        this.process = kernel.processes.get(this.processName);
+    public static createProcess(): void {
+        kernel.createProcess(this.processName, SpawnController.runMain, {});
     }
 
-    public * runMain(): Generator<unknown,any,unknown> {
+    public static * runMain(this: Thread<any>): Generator<unknown,any,unknown> {
+
         while(true) {
 
-            if(!this.process?.hasThread('queueManager')) {
-                this.process?.createThread('queueManager', spawnQueueService.run, [this.process]);
+            if(!this.process.hasThread(SpawnQueueService.mainThreadName)) {
+                this.process.createThread(SpawnQueueService.mainThreadName, SpawnQueueService.run, {});
             }
+
+            const ownedRooms = EmpireRepo.getRooms_My();
+
+            for(const room of ownedRooms) {
+                if(!this.process.hasThread(room.name)) {
+                    this.process.createThread<runRoomParams>(`spawnManager_${room.name}`, SpawnController.runRoom, {roomName: room.name});
+                }
+            }
+
+            yield "Main thread run - sleeping 10 ticks";
 
             yield * sleep(10);
 
         }
     }
 
-    public * runRoom(roomName: string): Generator<unknown,any,unknown> {
-
-        if(Game.rooms[roomName] === undefined) {
-            console.log("RunSpawns could not find room " + roomName + ", destroying thread.");
-            return;
-        }
+    public static * runRoom(roomName: string): Generator<unknown,any,unknown> {
 
         while(true) {
 
-            const spawns = Game.rooms[roomName].find(FIND_MY_SPAWNS);
-
-            if(spawns.length <= 0) {
-                console.log(`${roomName} does not have any active spawns.`);
-                yield * sleep(5);
-                continue;
-            }
+            yield `${roomName} Spawn thread run`;
 
         }
 
