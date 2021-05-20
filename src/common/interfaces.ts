@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import { Thread } from "OperatingSystem/thread";
+
+import { Process } from "OperatingSystem/process";
 
 export interface StringMap<T> {
     [key: string]: T
@@ -14,5 +15,6 @@ export abstract class IController {
 }
 
 export abstract class IService {
+    public static mainThreadName: string;
     public static run: GeneratorCreator;
 }

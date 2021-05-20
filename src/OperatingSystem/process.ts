@@ -21,9 +21,9 @@ export class Process{
         this.threads = new Set<string>();
     }
 
-    public createThread (threadName: string, fn: GeneratorCreator, ...args: any[]): void {
+    public createThread<ParamType = any>(threadName: string, fn: GeneratorCreator, argObj: ParamType): void {
         this.threads.add(threadName);
-        return this.kernel.createThread(this.name, threadName, fn, ...args);
+        return this.kernel.createThread<ParamType>(this.name, threadName, fn, argObj);
     }
 
     public destroyThread (threadName: string): void {

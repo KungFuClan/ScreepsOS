@@ -1,42 +1,76 @@
 import { EmpireRepo } from "Repositories/EmpireRepo";
 import { IService } from "common/interfaces";
-import { Process } from "OperatingSystem/process";
 import { Thread } from "OperatingSystem/thread";
+import { kernel } from "OperatingSystem/kernel";
+import { sleep } from "OperatingSystem/loopScheduler";
+import { Process } from "OperatingSystem/process";
 
-export interface spawnQueueObject {
+export interface SpawnQueueObject {
     creepRole: string,
     requestingRoom: string,
-    validator: (...args: any) => boolean
+    validator: undefined | ((...args: any) => boolean)
 }
+
+type runRoomParams = { roomName: string };
 
 export class SpawnQueueService extends IService{
 
-    public static spawnQueue = new Set<spawnQueueObject>();
+    public static spawnQueue = new Set<SpawnQueueObject>();
 
-    public static * run(this: Thread): Generator<unknown, any, unknown> {
+    public static mainThreadName = "spawnQueueManager";
+
+    public static initRoomQueues(process: Process): void {
 
         const ownedRooms = EmpireRepo.getRooms_My();
 
         for(const room of ownedRooms) {
-            if(!this.process.hasThread(room.name)) {
-                this.process.createThread(room.name, SpawnQueueService.runRoom, {process: this.process, roomName: room.name});
+            if(!process.hasThread(room.name)) {
+                process.createThread<runRoomParams>(`queueManager_${room.name}`, SpawnQueueService.runRoom, {roomName: room.name});
             }
-        }
-
-        yield;
-
-        let tempCount = 0;
-
-        while(true) {
-            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-            yield "RunSpawnQueue: " + ++tempCount;
         }
 
     }
 
-    public static * runRoom(process: Process, roomName: string): Generator<unknown, any, unknown> {
+    public static * run(this: Thread): Generator<unknown, any, unknown> {
+
+
+        SpawnQueueService.initRoomQueues(this.process);
+
+        yield;
+
         while(true) {
-            yield "Run Room SpawnQueue: " + roomName;
+
+            SpawnQueueService.spawnQueue.forEach(
+                value => {
+                    console.log("Spawn queue: " + JSON.stringify(value));
+                }
+            )
+
+            yield;
+            // yield * sleep(5);
+        }
+
+    }
+
+
+    public static * runRoom(this: Thread<runRoomParams>, roomName: string): Generator<unknown, any, unknown> {
+        while(true) {
+
+            if(Game.creeps.testCreep === undefined) {
+                const newSpawn: SpawnQueueObject = {
+                    creepRole: "test",
+                    requestingRoom: roomName,
+                    validator: undefined
+                }
+                if( !SpawnQueueService.spawnQueue.has(newSpawn)) {
+                    SpawnQueueService.spawnQueue.add(newSpawn);
+                    yield "Created spawn request";
+                    continue;
+                }
+            }
+
+            yield `SpawnQueue_${roomName} did not submit spawn request.`;
+
         }
     }
 }

@@ -5,19 +5,19 @@ import { Process } from "./process";
 import { StringMap } from "common/interfaces";
 
 export interface LoopState {
-    queue?: [string, Thread][]
+    queue?: [string, Thread<any>][]
     currentName?: string | null;
 }
 
 export type LoopScheduler = Generator<unknown,any,unknown>
 
-function createQueue(threads: ThreadMap): [string, Thread][] {
+function createQueue(threads: ThreadMap<any>): [string, Thread<any>][] {
     // TODO Maybe swap this for a priority system
     // return _.shuffle(Array.from(threads.entries()));
     return Array.from(threads.entries());
 }
 
-export function * loopScheduler (threads: ThreadMap, limit: number, state: LoopState = {}): LoopScheduler {
+export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: LoopState = {}): LoopScheduler {
     const queue = createQueue(threads);
     state.queue = queue;
 
@@ -80,35 +80,24 @@ export function * sleep (ticks: number): Generator<unknown, any, unknown> {
     while (Game.time < end) yield
 }
 
-export function * restartThread(this: Process | Thread, fn: GeneratorFunction, ...args: any[]): Generator<unknown, any, unknown>{
+export function * restartThread(this: Process | Thread<any>, fn: GeneratorFunction, ...args: any[]): Generator<unknown, any, unknown>{
     while (true) {
         try {
             yield * fn.apply(this, args)
         } catch (err) {
             // eslint-disable-next-line
-            console.log(`Thread '${this.name}' exited with error: ${err.stack || err.message || err}`)
+            // console.log(`Thread '${this.threadName}' exited with error: ${err.stack || err.message || err}`)
+            console.log("obvious error idiot");
         }
         yield
     }
 }
 
-  export function * watchdog(this: Process | Thread, name: string, fn: GeneratorFunction, ...args: any[]): Generator<unknown, any, unknown> {
-    while (true) {
-      if (!this.hasThread(name)) {
-        this.createThread(name, fn, ...args)
-      }
-      yield
-    }
-  }
-
-  export function * threadManager(this: Process | Thread, threads: Thread[], interval = 5): Generator<unknown, any, unknown> {
-    interval = Math.max(interval, 1)
-    while (true) {
-      for (const [name, fn, ...args] of threads) {
-        if (!this.hasThread(name)) {
-          this.createThread(name, fn, ...args)
-        }
-      }
-      yield* sleep(interval)
-    }
-  }
+// export function * watchdog<ParamType>(this: Process | Thread<any>, name: string, fn: GeneratorFunction, argsObj: ParamType): Generator<unknown, any, unknown> {
+// while (true) {
+//     if (!this.hasThread(name)) {
+//     this.createThread(name, fn, argsObj);
+//     }
+//     yield
+// }
+// }

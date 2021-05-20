@@ -1,9 +1,11 @@
 import { IService } from "common/interfaces";
-import { sleep } from "OperatingSystem/loopScheduler";
 import { Thread } from "OperatingSystem/thread";
+import { sleep } from "OperatingSystem/loopScheduler";
 
 export class RoomSpawnService extends IService {
-    public static * run (this: Thread, roomName: string): Generator<unknown, any, unknown> {
+
+
+    public static * run (this: Thread<{roomName: string}> , roomName: string): Generator<unknown, any, unknown> {
 
         if(Game.rooms[roomName] === undefined) {
             console.log("RunSpawns could not find room " + roomName + ", destroying thread.");
