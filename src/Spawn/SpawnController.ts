@@ -4,6 +4,7 @@ import { kernel } from 'OperatingSystem/kernel';
 import { Thread } from 'OperatingSystem/thread';
 import { EmpireRepo } from 'Repositories/EmpireRepo';
 import { sleep } from 'OperatingSystem/loopScheduler';
+import { StructureRepo, structureRepo } from 'Repositories/StructureRepo';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SpawnControllerParams = {
@@ -46,6 +47,10 @@ export class SpawnController extends IController {
     public static * runRoom(roomName: string): Generator<unknown,any,unknown> {
 
         while(true) {
+
+            const spawns = structureRepo.getStructure<StructureSpawn>(STRUCTURE_SPAWN, roomName);
+
+            console.log("Spawns: " + spawns[0]);
 
             yield `${roomName} Spawn thread run`;
 

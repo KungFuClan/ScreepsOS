@@ -39,12 +39,6 @@ export class SpawnQueueService extends IService{
 
         while(true) {
 
-            SpawnQueueService.spawnQueue.forEach(
-                value => {
-                    console.log("Spawn queue: " + JSON.stringify(value));
-                }
-            )
-
             yield;
             // yield * sleep(5);
         }
