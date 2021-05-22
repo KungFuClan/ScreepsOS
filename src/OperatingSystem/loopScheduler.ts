@@ -21,10 +21,6 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
     const queue = createQueue(threads);
     state.queue = queue;
 
-    for(const value of state.queue.entries()) {
-        console.log("Queue: " + value[1][0]);
-    }
-
     const counts: StringMap<number> = {};
     const cpu: StringMap<number> = {};
 
@@ -80,14 +76,13 @@ export function * sleep (ticks: number): Generator<unknown, any, unknown> {
     while (Game.time < end) yield
 }
 
-export function * restartThread(this: Process | Thread<any>, fn: GeneratorFunction, ...args: any[]): Generator<unknown, any, unknown>{
+export function * restartThread(this: Thread, fn: GeneratorFunction, ...args: any[]): Generator<unknown, any, unknown>{
     while (true) {
         try {
             yield * fn.apply(this, args)
         } catch (err) {
-            // eslint-disable-next-line
-            // console.log(`Thread '${this.threadName}' exited with error: ${err.stack || err.message || err}`)
-            console.log("obvious error idiot");
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            console.log(`Thread '${this.threadName}' exited with error: ${err}`)
         }
         yield
     }

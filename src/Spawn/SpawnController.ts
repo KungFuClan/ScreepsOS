@@ -1,10 +1,9 @@
-import { IController } from 'common/interfaces';
-import { SpawnQueueService } from './SpawnQueueService';
-import { kernel } from 'OperatingSystem/kernel';
-import { Thread } from 'OperatingSystem/thread';
 import { EmpireRepo } from 'Repositories/EmpireRepo';
+import { run as RoomSpawnRun } from './RoomSpawnService';
+import { Thread } from 'OperatingSystem/thread';
+import { kernel } from 'OperatingSystem/kernel';
 import { sleep } from 'OperatingSystem/loopScheduler';
-import { StructureRepo, structureRepo } from 'Repositories/StructureRepo';
+
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SpawnControllerParams = {
@@ -13,48 +12,23 @@ export type SpawnControllerParams = {
 
 type runRoomParams = { roomName: string };
 
-export class SpawnController extends IController {
+kernel.createProcess('spawnController', runMain, {});
 
-    public static processName = 'spawnController';
+function * runMain(this: Thread<any>): Generator<unknown,any,unknown> {
 
-    public static createProcess(): void {
-        kernel.createProcess(this.processName, SpawnController.runMain, {});
-    }
+    while(true) {
 
-    public static * runMain(this: Thread<any>): Generator<unknown,any,unknown> {
+        const ownedRooms = EmpireRepo.getRooms_My();
 
-        while(true) {
-
-            if(!this.process.hasThread(SpawnQueueService.mainThreadName)) {
-                this.process.createThread(SpawnQueueService.mainThreadName, SpawnQueueService.run, {});
+        for(const room of ownedRooms) {
+            if(!this.process.hasThread(room.name)) {
+                this.process.createThread<runRoomParams>(`spawnManager_${room.name}`, RoomSpawnRun, {roomName: room.name});
             }
-
-            const ownedRooms = EmpireRepo.getRooms_My();
-
-            for(const room of ownedRooms) {
-                if(!this.process.hasThread(room.name)) {
-                    this.process.createThread<runRoomParams>(`spawnManager_${room.name}`, SpawnController.runRoom, {roomName: room.name});
-                }
-            }
-
-            yield "Main thread run - sleeping 10 ticks";
-
-            yield * sleep(10);
-
         }
-    }
 
-    public static * runRoom(roomName: string): Generator<unknown,any,unknown> {
+        yield "Main thread run - sleeping 10 ticks";
 
-        while(true) {
-
-            const spawns = structureRepo.getStructure<StructureSpawn>(STRUCTURE_SPAWN, roomName);
-
-            console.log("Spawns: " + spawns[0]);
-
-            yield `${roomName} Spawn thread run`;
-
-        }
+        yield * sleep(10);
 
     }
 }

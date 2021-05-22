@@ -39,6 +39,7 @@ module.exports = {
       }
     ],
     "@typescript-eslint/restrict-plus-operands": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-parameter-properties": "off",
@@ -51,7 +52,7 @@ module.exports = {
     "arrow-parens": ["off", "as-needed"],
     camelcase: "error",
     complexity: "off",
-    "dot-notation": "error",
+    "dot-notation": "off",
     "eol-last": "off",
     eqeqeq: ["error", "smart"],
     "guard-for-in": "off",
