@@ -22,7 +22,7 @@ function * run(this: Thread): Generator<unknown, any, unknown> {
         const ownedRooms = EmpireRepo.getRooms_My();
 
         for(const room of ownedRooms) {
-            if(!this.process.hasThread(room.name)) {
+            if(!this.process.hasThread(`queueManager_${room.name}`)) {
                 this.process.createThread<runRoomParams>(`queueManager_${room.name}`, runRoom, {roomName: room.name});
             }
         }

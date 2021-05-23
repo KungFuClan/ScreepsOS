@@ -1,8 +1,8 @@
 import * as _ from "lodash"
 
 import { Thread, ThreadMap } from "./thread";
-import { Process } from "./process";
 import { StringMap } from "common/interfaces";
+import { kernel } from "OperatingSystem/kernel";
 
 export interface LoopState {
     queue?: [string, Thread<any>][]
@@ -31,8 +31,8 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
             const start = Game.cpu.getUsed();
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const {value, done} = item[1].next();
-            console.log(state.currentName + " Value: " + JSON.stringify(value));
 
+            // kernel.logger.debug(state.currentName + " Value: " + JSON.stringify(value));
 
             const duration = Game.cpu.getUsed() - start;
 
@@ -63,7 +63,8 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
                 .filter(i => i[1] > 2)
                 .map(([a, b]) => `${a}: ${b}`)
 
-            console.log(report);
+            kernel.logger.warn(
+                `Reached limit, ${Game.cpu.getUsed()} : ${limit}\n` + report.toString());
             return;
         }
 
@@ -82,7 +83,7 @@ export function * restartThread(this: Thread, fn: GeneratorFunction, ...args: an
             yield * fn.apply(this, args)
         } catch (err) {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            console.log(`Thread '${this.threadName}' exited with error: ${err}`)
+            kernel.logger.fatal(`Thread '${this.threadName}' exited with error: ${err}`)
         }
         yield
     }

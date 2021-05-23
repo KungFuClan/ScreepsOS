@@ -2,6 +2,7 @@ import { LoopState, loopScheduler } from "./loopScheduler";
 import { Process, ProcessMap } from "./process";
 import { Thread, ThreadMap } from "./thread";
 import { GeneratorCreator } from "common/interfaces";
+import { Logger } from "utils/Logger";
 
 export class Kernel {
 
@@ -10,6 +11,7 @@ export class Kernel {
     public pidGen: Generator<number, number, void>;
     public startTick: number;
     public schedulerState: LoopState;
+    public logger: Logger;
 
     public constructor() {
         this.threads = new Map<string, Thread<any>>();
@@ -17,6 +19,7 @@ export class Kernel {
         this.pidGen = calcCPUPID();
         this.startTick = Game.time;
         this.schedulerState = {};
+        this.logger = new Logger('[Kernel]');
     }
 
     private MIN_BUCKET = 1000;
@@ -28,7 +31,7 @@ export class Kernel {
 
         const scheduler = loopScheduler(this.threads, limit, this.schedulerState);
 
-        console.log(`Kernel has been up for: ${Game.time - this.startTick} ticks.`);
+        this.logger.info(`Uptime: ${Game.time - this.startTick} ticks.`);
 
         for(const value of scheduler) {
             if(typeof value === 'string') {
