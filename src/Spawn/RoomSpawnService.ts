@@ -1,4 +1,3 @@
-import { IService } from "common/interfaces";
 import { Thread } from "OperatingSystem/thread";
 import { structureRepo } from "Repositories/StructureRepo";
 

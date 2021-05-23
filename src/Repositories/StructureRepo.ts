@@ -1,4 +1,6 @@
+/* eslint-disable camelcase */
 import { FilterConstants } from "./interfaces";
+import { Logger } from "utils/Logger";
 
 export class StructureRepo {
 
@@ -8,7 +10,14 @@ export class StructureRepo {
                 [filterName in FilterConstants]?: Id<Structure>[]
             }
         }
-    } = {};
+    };
+
+    public name = "StructureRepo";
+
+    public constructor() {
+        this.cache = {};
+        return;
+    }
 
     public getOnlyObjectsById<T extends Structure<StructureConstant>>(values: Id<Structure>[]): T[] {
 
@@ -37,7 +46,6 @@ export class StructureRepo {
         }
 
         if(this.cache[roomName][structureType]![FilterConstants.ALL] !== undefined) {
-            console.log("GOT CACHED STRUCTURES OF TYPE: " + structureType);
             return this.getOnlyObjectsById<T>(this.cache[roomName][structureType]![FilterConstants.ALL]!);
         } else {
 
@@ -48,13 +56,21 @@ export class StructureRepo {
             const structures = Game.rooms[roomName].find(FIND_STRUCTURES, {filter: {structureType}}) as Structure[];
             this.cache[roomName][structureType]![FilterConstants.ALL] = structures.map(struct => struct.id);
 
+            Logger.withPrefix('[StructureRepo]').alert("Got uncached structures of type: " + structureType);
+
             return structures as T[];
 
         }
 
     }
 
+    public getStructure_My<T extends OwnedStructure>(structureType: StructureConstant, roomName: string): T[] {
 
+        const structs = this.getStructure<T>(structureType, roomName);
+
+        return structs.filter(struct => struct.my);
+
+    }
 }
 
 // eslint-disable-next-line prefer-const

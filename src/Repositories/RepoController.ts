@@ -1,37 +1,41 @@
-/* eslint-disable prefer-const */
-import { IController } from "common/interfaces";
-import { StructureRepo } from "./StructureRepo";
+import { Logger } from "utils/Logger";
 import { Thread } from "OperatingSystem/thread";
 import { kernel } from "OperatingSystem/kernel";
 import { sleep } from "OperatingSystem/loopScheduler";
+import { structureRepo } from "./StructureRepo";
 
-export type restartRepoParams = { sleepTime: number }
+type Repository = { cache: any, name?: string }
 
-export let structureRepo = new StructureRepo();
+type ResetRepositoryParams = {
+    sleepTime: number,
+    repository: Repository
+};
 
-kernel.createProcess('repoController', runMain, {instance: this});
+kernel.createProcess('RepositoryController', runRepositoryController, {});
 
-function * runMain(this: Thread): Generator {
+const logger = new Logger('[RepositoryController]');
+
+function * runRepositoryController(this: Thread): Generator {
 
     while(true) {
-        // ! We cannot access restartRepo without having an instance of the class or it being a static method
-        if(!this.process.hasThread('RestartStructureRepo')) {
-            kernel.createThread<restartRepoParams>('repoController', 'RestartStructureRepo', restartRepo, {sleepTime: 5});
+        if(!this.hasThread('StructureRepoReset')){
+            this.createThread<ResetRepositoryParams>('StructureRepoReset', fullResetCache, { sleepTime: 5, repository: structureRepo });
         }
 
-        yield * sleep(5);
-
+        yield * sleep(10);
     }
-
 }
 
-function * restartRepo(this: Thread, sleepTime: number): Generator {
-
+function * fullResetCache(this: Thread, sleepTime: number, repository: Repository): Generator {
     while(true) {
 
         yield * sleep(sleepTime);
 
-        structureRepo = new StructureRepo();
+        // Repos.structures = new StructureRepo();
+        repository.cache = {};
 
+        if(repository.name) {
+            logger.info(`${repository.name}: Cache has been reset.`);
+        }
     }
 }

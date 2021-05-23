@@ -30,7 +30,7 @@ export class Thread<ParamType = any> {
 
     public [Symbol.iterator](): Thread<ParamType> { return this }
 
-    public createThread<ParamType>(threadName: string, fn: GeneratorFunction, argObj: ParamType): void {
+    public createThread<ParamType>(threadName: string, fn: GeneratorCreator, argObj: ParamType): void {
         return this.process.createThread(threadName, fn, argObj);
     }
 
