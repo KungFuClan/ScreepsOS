@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-namespace */
 import "importProcesses";
+import "OperatingSystem/SafeObject";
 
 import { ErrorMapper } from "utils/ErrorMapper";
 import { kernel } from "OperatingSystem/kernel";
@@ -26,6 +27,11 @@ declare global {
     homeRoom: string;
     targetRoom: string;
     working: boolean;
+  }
+
+  interface RoomObject {
+    safe: <T extends RoomObject>() => T;
+    id: Id<this>;
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")

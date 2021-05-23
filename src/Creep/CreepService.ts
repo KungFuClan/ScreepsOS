@@ -10,6 +10,7 @@ export function * run (this: Thread<{creepName: string}> , creepName: string): G
             return;
         }
 
+        creep.safe<Creep>().say("Testing");
         // todo, pass in correct instance of creep runner to this method
         // todo, find way to refresh creep reference if thread goes into next tick
 
