@@ -4,7 +4,6 @@ import "importProcesses";
 
 import { ErrorMapper } from "utils/ErrorMapper";
 import { kernel } from "OperatingSystem/kernel";
-import { Logger } from "utils/Logger";
 
 
 declare global {

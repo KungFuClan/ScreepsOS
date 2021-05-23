@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { FilterConstants } from "./interfaces";
 import { Logger } from "utils/Logger";
 
@@ -10,6 +11,8 @@ export class StructureRepo {
             }
         }
     };
+
+    public name = "StructureRepo";
 
     public constructor() {
         this.cache = {};
@@ -61,7 +64,13 @@ export class StructureRepo {
 
     }
 
+    public getStructure_My<T extends OwnedStructure>(structureType: StructureConstant, roomName: string): T[] {
 
+        const structs = this.getStructure<T>(structureType, roomName);
+
+        return structs.filter(struct => struct.my);
+
+    }
 }
 
 // eslint-disable-next-line prefer-const
