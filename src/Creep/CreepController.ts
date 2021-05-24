@@ -1,7 +1,7 @@
-import { Thread } from "OperatingSystem/thread";
-import { kernel } from 'OperatingSystem/kernel';
 import { CreepRepo } from "Repositories/CreepRepo";
 import { run as CreepRunner } from "Creep/CreepService";
+import { Thread } from "OperatingSystem/thread";
+import { kernel } from 'OperatingSystem/kernel';
 
 interface runCreepParams {
     creepName: string
