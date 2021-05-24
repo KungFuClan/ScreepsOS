@@ -1,7 +1,7 @@
 import { EmpireRepo } from "Repositories/EmpireRepo";
-import { Process } from "OperatingSystem/process";
 import { Thread } from "OperatingSystem/thread";
 import { kernel } from "OperatingSystem/kernel";
+import { sleep } from "OperatingSystem/loopScheduler";
 
 export interface SpawnQueueObject {
     creepRole: string,
@@ -27,8 +27,7 @@ function * run(this: Thread): Generator<unknown, any, unknown> {
             }
         }
 
-        yield;
-        // yield * sleep(5);
+        yield * sleep(5);
     }
 
 }

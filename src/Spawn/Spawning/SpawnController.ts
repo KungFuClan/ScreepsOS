@@ -26,8 +26,6 @@ function * runMain(this: Thread<any>): Generator<unknown,any,unknown> {
             }
         }
 
-        yield "Main thread run - sleeping 10 ticks";
-
         yield * sleep(10);
 
     }
