@@ -4,6 +4,7 @@ import "importProcesses";
 import "OperatingSystem/SafeObject";
 
 import { ErrorMapper } from "utils/ErrorMapper";
+import { RoleConstants } from "Creep/interfaces/CreepConstants";
 import { kernel } from "OperatingSystem/kernel";
 
 
@@ -23,7 +24,7 @@ declare global {
   }
 
   interface CreepMemory {
-    role: string;
+    role: RoleConstants;
     homeRoom: string;
     targetRoom: string;
     working: boolean;

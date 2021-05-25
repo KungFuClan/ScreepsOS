@@ -1,15 +1,14 @@
+import { CreepRunners } from "Creep/interfaces/CreepConstants";
+import { Logger } from "utils/Logger";
 import { Thread } from "OperatingSystem/thread";
 
+const _logger = new Logger("CreepService");
+
 export function * run (this: Thread<{creepName: string}> , creepName: string): Generator<unknown, any, unknown> {
-    while(true) {
-
-        const creep = Game.creeps[creepName];
-        if(creep === undefined) {
-            yield "Run Creeps could not find creep " + creepName + ", destroying thread.";
-            return;
-        }
-
-        yield `${creepName} Creep thread run`;
+    const creep = Game.creeps[creepName];
+    if(creep === undefined) {
+        _logger.warn(`${creepName} could not be found on CreepService.run`);
+        return;
     }
-
+    yield * CreepRunners[creep.memory.role].run(creepName);
 }
