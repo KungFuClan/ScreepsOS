@@ -1,7 +1,9 @@
 import * as _ from "lodash"
 
 import { Thread, ThreadMap } from "./thread";
+
 import { StringMap } from "common/interfaces";
+import { ThreadState } from "./interfaces";
 import { kernel } from "OperatingSystem/kernel";
 
 export interface LoopState {
@@ -28,7 +30,7 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
         try{
             const start = Game.cpu.getUsed();
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const {value, done} = item[1].next();
+            const {value: yieldValue, done} = item[1].next();
 
             // kernel.logger.debug(state.currentName + " Value: " + JSON.stringify(value));
 
@@ -39,7 +41,7 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
             cpu[state.currentName] = cpu[state.currentName] || 0;
             cpu[state.currentName] += duration;
 
-            if(!done && value === true) {
+            if(!done && yieldValue === ThreadState.RESUME) {
                 queue.push(item);
             }
 

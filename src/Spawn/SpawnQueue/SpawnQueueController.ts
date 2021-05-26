@@ -1,3 +1,4 @@
+import { runRoomParams, runRoomSpawnQueue } from "./RoomSpawnQueueService";
 import { EmpireRepo } from "Repositories/EmpireRepo";
 import { Thread } from "OperatingSystem/thread";
 import { kernel } from "OperatingSystem/kernel";
@@ -9,13 +10,11 @@ export interface SpawnQueueObject {
     validator: undefined | ((...args: any) => boolean)
 }
 
-type runRoomParams = { roomName: string };
+kernel.createProcess('SpawnQueueController', runSpawnQueueMain, {});
 
-kernel.createProcess('SpawnQueueController', run, {});
+export const spawnQueue = new Map<string,SpawnQueueObject>();
 
-const spawnQueue = new Map<string,SpawnQueueObject>();
-
-function * run(this: Thread): Generator<unknown, any, unknown> {
+function * runSpawnQueueMain(this: Thread): Generator<unknown, any, unknown> {
 
     while(true) {
 
@@ -23,7 +22,7 @@ function * run(this: Thread): Generator<unknown, any, unknown> {
 
         for(const room of ownedRooms) {
             if(!this.process.hasThread(`queueManager_${room.name}`)) {
-                this.process.createThread<runRoomParams>(`queueManager_${room.name}`, runRoom, {roomName: room.name});
+                this.process.createThread<runRoomParams>(`queueManager_${room.name}`, runRoomSpawnQueue, {roomName: room.name});
             }
         }
 
@@ -32,26 +31,4 @@ function * run(this: Thread): Generator<unknown, any, unknown> {
 
 }
 
-function * runRoom(this: Thread<runRoomParams>, roomName: string): Generator<unknown, any, unknown> {
-    while(true) {
 
-        const creepName = 'testCreep';
-
-        if(Game.creeps[creepName] === undefined) {
-            const newSpawn: SpawnQueueObject = {
-                creepRole: "test",
-                requestingRoom: roomName,
-                validator: undefined
-            }
-
-            if(!spawnQueue.has(creepName)) {
-                spawnQueue.set(creepName, newSpawn);
-                yield "Created spawn request";
-                continue;
-            }
-        }
-
-        yield `SpawnQueue_${roomName} did not submit spawn request.`;
-
-    }
-}

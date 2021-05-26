@@ -1,7 +1,8 @@
 import { EmpireRepo } from 'Repositories/EmpireRepo';
-import { run as RoomSpawnRun } from './RoomSpawnService';
 import { Thread } from 'OperatingSystem/thread';
 import { kernel } from 'OperatingSystem/kernel';
+import { runRoomParams } from 'Spawn/SpawnQueue/RoomSpawnQueueService';
+import { runRoomSpawn } from './RoomSpawnService';
 import { sleep } from 'OperatingSystem/loopScheduler';
 
 
@@ -10,11 +11,10 @@ export type SpawnControllerParams = {
     roomName: string;
 }
 
-type runRoomParams = { roomName: string };
 
-kernel.createProcess('spawnController', runMain, {});
+kernel.createProcess('spawnController', runSpawnMain, {});
 
-function * runMain(this: Thread<any>): Generator<unknown,any,unknown> {
+function * runSpawnMain(this: Thread<any>): Generator<unknown,any,unknown> {
 
     while(true) {
 
@@ -22,7 +22,7 @@ function * runMain(this: Thread<any>): Generator<unknown,any,unknown> {
 
         for(const room of ownedRooms) {
             if(!this.process.hasThread(room.name)) {
-                this.process.createThread<runRoomParams>(`spawnManager_${room.name}`, RoomSpawnRun, {roomName: room.name});
+                this.process.createThread<runRoomParams>(`spawnManager_${room.name}`, runRoomSpawn, {roomName: room.name});
             }
         }
 

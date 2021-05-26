@@ -1,7 +1,9 @@
 import { Thread } from "OperatingSystem/thread";
 import { structureRepo } from "Repositories/StructureRepo";
 
-export function * run (this: Thread<{roomName: string}> , roomName: string): Generator<unknown, any, unknown> {
+export type runRoomParams = { roomName: string };
+
+export function * runRoomSpawn (this: Thread<{roomName: string}> , roomName: string): Generator<unknown, any, unknown> {
     while(true) {
 
         if(Game.rooms[roomName] === undefined) {
