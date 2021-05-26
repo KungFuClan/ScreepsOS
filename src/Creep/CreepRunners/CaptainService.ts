@@ -1,7 +1,7 @@
 import { ICreepRunner } from "Creep/interfaces/interfaces";
 
 export const CaptainService: ICreepRunner = {
-    *run (creepName: string): Generator {
+    *runRole (creepName: string): Generator {
         yield creepName;
     }
 }

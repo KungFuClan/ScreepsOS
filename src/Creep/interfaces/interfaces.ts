@@ -1,3 +1,3 @@
 export type ICreepRunner = {
-    run: (creepName: string) => Generator;
+    runRole: (creepName: string) => Generator;
 };
