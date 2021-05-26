@@ -50,7 +50,7 @@ module.exports = {
     "@typescript-eslint/unified-signatures": "error",
     "@typescript-eslint/unbound-method": "off",
     "arrow-parens": ["off", "as-needed"],
-    camelcase: "error",
+    camelcase: "off",
     complexity: "off",
     "dot-notation": "off",
     "eol-last": "off",
