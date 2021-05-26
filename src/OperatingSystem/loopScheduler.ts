@@ -9,15 +9,13 @@ export interface LoopState {
     currentName?: string | null;
 }
 
-export type LoopScheduler = Generator<unknown,any,unknown>
-
 function createQueue(threads: ThreadMap<any>): [string, Thread<any>][] {
     // TODO Maybe swap this for a priority system
     // return _.shuffle(Array.from(threads.entries()));
     return Array.from(threads.entries());
 }
 
-export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: LoopState = {}): LoopScheduler {
+export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: LoopState = {}): Generator<unknown,any,unknown> {
     const queue = createQueue(threads);
     state.queue = queue;
 

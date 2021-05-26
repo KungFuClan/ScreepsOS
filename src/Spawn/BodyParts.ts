@@ -12,7 +12,90 @@ export type BodyDefinition = {
     [TOUGH]?: number,
 }
 
+export enum BodyArrayStyle {
+    GROUPED = 0,
+    COLLATED = 1
+}
+
+export enum BodyArrayModifier {
+    TOUGH_FIRST = 0,
+    HEAL_LAST = 1
+}
 export class BodyPartsUtil {
+
+    public static getPartsArray(body: BodyDefinition, bodyStyle: BodyArrayStyle, bodyModifiers: BodyArrayModifier[]): BodyPartConstant[] {
+
+        const toughFirst = !!bodyModifiers.find(val => val === BodyArrayModifier.TOUGH_FIRST);
+        const healLast = !!bodyModifiers.find(val => val === BodyArrayModifier.HEAL_LAST);
+        let healPartsHeld = 0;
+
+        const parts: BodyPartConstant[] = [];
+
+        if(toughFirst) {
+            parts.push(...this.createPartArray(TOUGH, body[TOUGH] || 0));
+            body[TOUGH] = 0;
+        }
+
+        if(healLast) {
+            healPartsHeld = body[HEAL] || 0;
+            body[HEAL] = 0;
+        }
+
+        if(bodyStyle === BodyArrayStyle.GROUPED) {
+            parts.push(...this.groupParts(body));
+        }
+
+        if(bodyStyle === BodyArrayStyle.COLLATED) {
+            parts.push(...this.collateParts(body));
+        }
+
+        if(healLast) {
+            parts.push(...this.createPartArray(HEAL, healPartsHeld));
+        }
+
+        return parts;
+
+    }
+
+    private static createPartArray(part: BodyPartConstant, count: number): BodyPartConstant[] {
+
+        const returnArray: BodyPartConstant[] = [];
+
+        for(let i = 0; i < count; i++) {
+            returnArray.push(part);
+        }
+
+        return returnArray;
+    }
+
+    private static groupParts(bodyDefinition: BodyDefinition): BodyPartConstant[] {
+
+        const returnParts: BodyPartConstant[] = [];
+        _.forEach(Object.keys(bodyDefinition), (part: BodyPartConstant) => {
+            returnParts.push(...this.createPartArray(part, bodyDefinition[part] || 0));
+        });
+        return returnParts;
+    }
+
+    private static collateParts(bodyDefinition: BodyDefinition):BodyPartConstant[] {
+
+        const returnParts: BodyPartConstant[] = [];
+        const numParts: number = _.sum(_.values(bodyDefinition));
+        const partNames = Object.keys(bodyDefinition) as BodyPartConstant[];
+
+        let i = 0;
+        while (i < numParts) {
+            for(const currPart of partNames) {
+                if (bodyDefinition[currPart]! > 0) {
+                    returnParts.push(currPart);
+                    bodyDefinition[currPart]!--;
+                    i++;
+                }
+            }
+        }
+        return returnParts;
+
+    }
 
     public static getPartsCost(body: BodyDefinition): number {
 
