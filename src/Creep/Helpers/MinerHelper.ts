@@ -2,6 +2,7 @@ import { CommonRoomHelper } from "common/Helpers/Common_RoomHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
 import { Logger } from "utils/Logger";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
+import _ from "lodash";
 
 const _logger = new Logger("MinerHelper");
 
@@ -19,12 +20,11 @@ export class MinerHelper {
      */
     public static GetSourceWithLowestWorkSaturation(sources: Source[], roomName: string): Source {
         const minerRoles = [RoleConstants.MINER];
-        const creeps = CreepRepo.GetCreeps_My_ByRoom_ByName_ByRoles(roomName, minerRoles);
         const sourceOptions: SourceSaturation[] = []
 
         for(const source of sources) {
             const numAccessTiles = CommonRoomHelper.GetNumOpenTiles(source.pos);
-            const creepsTargeting = _.filter(creeps, (creep) => creep.memory.target?.id === source.id);
+            const creepsTargeting = CreepRepo.GetCreepsTargetingObjectByRoles(source, minerRoles);
             if(creepsTargeting.length < numAccessTiles) {
                 const workParts = _.sum(creepsTargeting,
                     (creep) =>

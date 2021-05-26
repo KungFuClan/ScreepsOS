@@ -1,5 +1,6 @@
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
 import { StringMap } from "common/interfaces";
+import _ from "lodash";
 
 export const CivilianCreeps: StringMap<boolean> = {
     [RoleConstants.MINER]: true,
@@ -35,5 +36,18 @@ export class CreepRepo {
      */
     public static GetCreeps_My_ByRoom_ByName_ByRoles(roomName: string, roles: RoleConstants[]): Creep[] {
         return _.filter(this.GetAllCreeps_My(), (creep) => roles.includes(creep.memory.role) && creep.memory.homeRoom === roomName);
+    }
+
+    public static GetCreeps_My_ByRoles(roles: RoleConstants[]): Creep[] {
+        return _.filter(this.GetAllCreeps_My(), (creep) => roles.includes(creep.memory.role))
+    }
+
+    public static GetCreepsTargetingObjectByRoles(target: RoomObject, roles: RoleConstants[]): Creep[] {
+        return _.filter(this.GetAllCreeps_My(), (creep) => {
+            if(!creep.memory.target){
+                return;
+            }
+            return creep.memory.target === target.id && roles.includes(creep.memory.role);
+        });
     }
 }

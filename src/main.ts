@@ -19,7 +19,7 @@ declare global {
     homeRoom: string;
     targetRoom: string;
     working: boolean;
-    target?: RoomObject;
+    target?: Id<RoomObject>;
   }
 
   interface RoomObject {
