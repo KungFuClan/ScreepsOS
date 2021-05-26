@@ -4,6 +4,11 @@ import { Logger } from "utils/Logger";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
 
 const _logger = new Logger("MinerHelper");
+
+interface SourceSaturation {
+    source: Source;
+    workParts: number;
+};
 export class MinerHelper {
 
     /**
@@ -12,16 +17,23 @@ export class MinerHelper {
      * @param roomName the room we are in
      * @returns The source we should be tareting
      */
-    public static GetSourceWithLowestWorkSaturation(sources: Source[], roomName: string): Source[] {
+    public static GetSourceWithLowestWorkSaturation(sources: Source[], roomName: string): Source {
         const minerRoles = [RoleConstants.MINER];
         const creeps = CreepRepo.GetCreeps_My_ByRoom_ByName_ByRoles(roomName, minerRoles);
-        const sourceOptions: Source[] = [];
+        const sourceOptions: SourceSaturation[] = []
 
         for(const source of sources) {
             const numAccessTiles = CommonRoomHelper.GetNumOpenTiles(source.pos);
-            const numCreepsTargeting = _.filter(creeps, (creep) => creep.memory.target?.id === source.id).length;
-            if(numCreepsTargeting < numAccessTiles) {
-                sourceOptions.push(source);
+            const creepsTargeting = _.filter(creeps, (creep) => creep.memory.target?.id === source.id);
+            if(creepsTargeting.length < numAccessTiles) {
+                const workParts = _.sum(creepsTargeting,
+                    (creep) =>
+                        _.filter(creep.body, (part) => part.type === WORK).length
+                    );
+                sourceOptions.push({
+                    source,
+                    workParts
+                });
             }
         }
 
@@ -29,6 +41,7 @@ export class MinerHelper {
             _logger.warn(`Miner in ${roomName} could not find suitable source to work.`);
         }
 
-        return sourceOptions;
+        const lowestSaturatedSource = sourceOptions.reduce((previous, current) => previous.workParts < current.workParts ? previous : current);
+        return lowestSaturatedSource.source;
     }
 }

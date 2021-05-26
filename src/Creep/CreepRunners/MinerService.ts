@@ -7,7 +7,7 @@ export const MinerService: ICreepRunner = {
 
         const creep = Game.creeps[creepName];
         const sources = RoomRepo.GetAllSources_ByRoom(creep.room.name);
-        const targetSource = creep.pos.findClosestByRange(MinerHelper.GetSourceWithLowestWorkSaturation(sources, creep.room.name));
+        const targetSource = MinerHelper.GetSourceWithLowestWorkSaturation(sources, creep.room.name);
 
         yield true;
     }
