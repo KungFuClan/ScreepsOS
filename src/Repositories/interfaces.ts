@@ -1,5 +1,3 @@
-import { StringMap } from "common/interfaces";
-
 export enum FilterConstants {
     ALL = "ALL",
     NOT_EMPTY = "NOT_EMPTY",
