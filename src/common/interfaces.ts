@@ -1,7 +1,4 @@
 /* eslint-disable max-classes-per-file */
-
-import { Process } from "OperatingSystem/process";
-
 export interface StringMap<T> {
     [key: string]: T
 }
