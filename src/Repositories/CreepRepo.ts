@@ -76,6 +76,19 @@ export class CreepRepo {
         return target as T;
     }
 
+    public static GetCreepWorkingStatus(creep: Creep): boolean {
+        return creep.memory.working;
+    }
+
+    /**
+     * Set the working status for the creep
+     * @param creep the creep we're setting memory for
+     * @param status The status we're setting memory to
+     */
+    public static SetCreepWorkingStatus(creep: Creep, status: boolean): void {
+        creep.memory.working = status;
+    }
+
     /**
      * Give the creep a target in memory
      * @param creep The creep we're setting the memory for

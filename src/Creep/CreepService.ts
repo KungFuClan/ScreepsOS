@@ -1,7 +1,7 @@
 import { CreepRunners } from "Creep/interfaces/CreepConstants";
 import { Logger } from "utils/Logger";
 import { Thread } from "OperatingSystem/thread";
-import { sleep } from "OperatingSystem/loopScheduler";
+import { ThreadState } from "OperatingSystem/interfaces";
 
 const _logger = new Logger("CreepService");
 
@@ -13,8 +13,7 @@ export function * runCreep (this: Thread<{creepName: string}> , creepName: strin
     }
 
     if(creep.spawning) {
-        const ticksToSpawn = creep.body.length * CREEP_SPAWN_TIME;
-        yield * sleep(ticksToSpawn);
+        yield ThreadState.SUSPEND;
     }
 
     yield * CreepRunners[creep.memory.role].runRole(creepName);
