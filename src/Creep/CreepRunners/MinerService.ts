@@ -29,14 +29,19 @@ export const MinerService: ICreepRunner = {
 
         const working = CreepRepo.GetCreepWorkingStatus(creep);
         const inRangeOfMoveTarget = creep.pos.inRangeTo(moveTarget.pos, range);
+        if(!working && inRangeOfMoveTarget) {
+            CreepRepo.SetCreepWorkingStatus(creep, true);
+        }
+        if(working && !inRangeOfMoveTarget) {
+            CreepRepo.SetCreepWorkingStatus(creep, false);
+        }
 
-        // flip bits
-        // not working, in range -> working true
-        // working, not in range -> flip false
-
-        // do action
-        // working, harvest source
-        // not working, move to source
+        if(working) {
+            creep.harvest(targetSource);
+        }
+        else {
+            creep.moveTo(moveTarget);
+        }
 
         yield ThreadState.SUSPEND;
     }
