@@ -15,10 +15,10 @@ export const MinerService: ICreepRunner = {
     *runRole (this: Thread<IRunCreepParams>, creepName: string): Generator {
 
         const cache: StringMap<any> = {}
-        _logger.info("Cache created");
+        _logger.info("Cache created for miner");
 
         while(Game.creeps[creepName]) {
-            _logger.debug("Entering miner logic");
+            _logger.info("Running miner logic");
             const creep = Game.creeps[creepName];
             let targetSource = CreepRepo.GetCreepMemoryTarget<Source>(creep);
             if(!targetSource) {

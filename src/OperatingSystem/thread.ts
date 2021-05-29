@@ -1,5 +1,7 @@
 import { Process, ProcessMemory } from "./process";
+
 import { GeneratorCreator } from "common/interfaces";
+import { Logger } from "utils/Logger";
 import _ from "lodash";
 
 export type ThreadMap<ParamType> = Map<string, Thread<ParamType> >;

@@ -46,6 +46,7 @@ export class MinerHelper {
     }
 
     public static GetMiningContainer(source: Source): StructureContainer | null {
-        throw new Error("Not Implemented");
+        return null;
+        // throw new Error("Not Implemented");
     }
 }
