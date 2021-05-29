@@ -38,6 +38,7 @@ module.exports = {
         accessibility: "explicit"
       }
     ],
+    "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/restrict-plus-operands": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
@@ -48,6 +49,7 @@ module.exports = {
     "@typescript-eslint/prefer-for-of": "error",
     "@typescript-eslint/space-within-parens": ["off", "never"],
     "@typescript-eslint/unified-signatures": "error",
+    "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/unbound-method": "off",
     "arrow-parens": ["off", "as-needed"],
     camelcase: "off",

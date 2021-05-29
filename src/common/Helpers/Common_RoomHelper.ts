@@ -1,3 +1,5 @@
+import { EnergyTier } from "Spawn/interfaces";
+
 export class CommonRoomHelper {
 
     /**
@@ -19,5 +21,34 @@ export class CommonRoomHelper {
             }
         }
         return accessibleTiles;
+    }
+
+    public static getEnergyTier(roomName: string): EnergyTier {
+
+        if(!Game.rooms[roomName]) {
+            throw new Error(`Could not find ${roomName} to get energy tier.`);
+        }
+
+        const energyAvailable = Game.rooms[roomName].energyCapacityAvailable;
+
+        // Check what tier we are in based on the amount of energy the room has
+        if (energyAvailable >= EnergyTier.T8) {
+            return EnergyTier.T8;
+        } else if (energyAvailable >= EnergyTier.T7) {
+            return EnergyTier.T7;
+        } else if (energyAvailable >= EnergyTier.T6) {
+            return EnergyTier.T6;
+        } else if (energyAvailable >= EnergyTier.T5) {
+            return EnergyTier.T5;
+        } else if (energyAvailable >= EnergyTier.T4) {
+            return EnergyTier.T4;
+        } else if (energyAvailable >= EnergyTier.T3) {
+            return EnergyTier.T3;
+        } else if (energyAvailable >= EnergyTier.T2) {
+            return EnergyTier.T2;
+        } else {
+            return EnergyTier.T1;
+        }
+
     }
 }

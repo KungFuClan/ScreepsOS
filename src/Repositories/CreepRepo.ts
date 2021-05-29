@@ -34,7 +34,7 @@ export class CreepRepo {
      * @param roles Array of roles we are filtering by
      * @returns Array of creeps with the specified filters
      */
-    public static GetCreeps_My_ByRoom_ByName_ByRoles(roomName: string, roles: RoleConstants[]): Creep[] {
+    public static GetCreeps_My_ByRoom_ByRoles(roomName: string, roles: RoleConstants[]): Creep[] {
         return _.filter(this.GetAllCreeps_My(), (creep) => roles.includes(creep.memory.role) && creep.memory.homeRoom === roomName);
     }
 

@@ -1,29 +1,29 @@
-import { SpawnQueueObject, spawnQueue } from "./SpawnQueueController";
-
+import { SpawnQueueHelper } from "./SpawnQueueHelper";
+import {SpawningOptions} from "../interfaces";
 import { Thread } from "OperatingSystem/thread";
+import { spawn } from "child_process";
 
 export type runRoomParams = { roomName: string };
+
+
 
 export function * runRoomSpawnQueue(this: Thread<runRoomParams>, roomName: string): Generator<unknown, any, unknown> {
     while(true) {
 
-        const creepName = 'testCreep';
 
-        if(Game.creeps[creepName] === undefined) {
-            const newSpawn: SpawnQueueObject = {
-                creepRole: "test",
-                requestingRoom: roomName,
-                validator: undefined
-            }
 
-            if(!spawnQueue.has(creepName)) {
-                spawnQueue.set(creepName, newSpawn);
-                yield "Created spawn request";
-                continue;
-            }
-        }
 
-        yield `SpawnQueue_${roomName} did not submit spawn request.`;
+       yield `SpawnQueue_${roomName} did not submit spawn request.`;
 
     }
+}
+
+function numMinersToQueue(roomName: string, spawnOptions: SpawningOptions) {
+
+        const numWorkPartsNeeded = SpawnQueueHelper.WorkPartsNeededForMining(roomName) - SpawnQueueHelper.GetExistingMinerWorkParts(roomName);
+
+        const remainingCapacity = Game.rooms[roomName].energyCapacityAvailable;
+
+
+
 }
