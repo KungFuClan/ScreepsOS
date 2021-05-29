@@ -2,10 +2,11 @@ import * as _ from "lodash"
 
 import { Thread, ThreadMap } from "./thread";
 
+import { Logger } from "utils/Logger";
 import { StringMap } from "common/interfaces";
 import { ThreadState } from "./interfaces";
-import { kernel } from "OperatingSystem/kernel";
 
+const _logger = new Logger("LoopScheduler");
 export interface LoopState {
     queue?: [string, Thread<any>][]
     currentName?: string | null;
@@ -31,9 +32,6 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
             const start = Game.cpu.getUsed();
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const {value: yieldValue, done} = item[1].next();
-
-            // kernel.logger.debug(state.currentName + " Value: " + JSON.stringify(value));
-
             const duration = Game.cpu.getUsed() - start;
 
             counts[state.currentName] = counts[state.currentName] || 0;
@@ -61,9 +59,9 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
             const report = queue.slice(queue.indexOf(item))
                 .map(i => [i[0], cpu[i[0]]])
                 .filter(i => i[1] > 2)
-                .map(([a, b]) => `${a}: ${b}`)
+                .map(([a, b]) => `${a}: ${b}`);
 
-            kernel.logger.warn(
+            _logger.warn(
                 `Reached limit, ${Game.cpu.getUsed()} : ${limit}\n` + report.toString());
             return;
         }
@@ -73,19 +71,19 @@ export function * loopScheduler (threads: ThreadMap<any>, limit: number, state: 
 }
 
 export function * sleep (ticks: number): Generator<unknown, any, unknown> {
-    const end = Game.time + ticks
-    while (Game.time < end) yield
+    const end = Game.time + ticks;
+    while (Game.time < end) yield;
 }
 
 export function * restartThread(this: Thread, fn: GeneratorFunction, ...args: any[]): Generator<unknown, any, unknown>{
     while (true) {
         try {
-            yield * fn.apply(this, args)
+            yield * fn.apply(this, args);
         } catch (err) {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            kernel.logger.fatal(`Thread '${this.threadName}' exited with error: ${err}`)
+            _logger.fatal(`Thread '${this.threadName}' exited with error: ${err}`);
         }
-        yield
+        yield;
     }
 }
 

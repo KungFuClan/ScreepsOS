@@ -1,16 +1,12 @@
-import { CreepRunners } from "Creep/interfaces/CreepConstants";
-import { IRunCreepParams } from "./CreepController"
+import { CreepRunners } from "./CreepRunners/RunnerConstants";
+import { IRunCreepParams } from "./interfaces/interfaces";
 import { Logger } from "utils/Logger";
-import { StringMap } from "common/interfaces";
 import { Thread } from "OperatingSystem/thread";
 import { ThreadState } from "OperatingSystem/interfaces";
 
 const _logger = new Logger("CreepService");
 
 export function * runCreep (this: Thread<IRunCreepParams> , creepName: string): Generator<unknown, any, unknown> {
-
-    const cache: StringMap<any> = {}
-
     while(Game.creeps[creepName]) {
         const creep = Game.creeps[creepName];
 
@@ -23,6 +19,8 @@ export function * runCreep (this: Thread<IRunCreepParams> , creepName: string): 
             yield ThreadState.SUSPEND;
         }
 
-        yield * CreepRunners[creep.memory.role].runRole(creepName, cache);
+        if(!this.process.hasThread(`$roleService_${creepName}`)) {
+            this.process.createThread(`roleService_${creepName}`, CreepRunners[creep.safe<Creep>().memory.role].runRole, {});
+        }
     }
 }

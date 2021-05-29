@@ -8,3 +8,7 @@ export type ICreepRunner = {
 export type ICreepBuilder = {
     runBuilder: (roomName: string, spawnOptions: SpawningOptions) => Generator;
 }
+
+export interface IRunCreepParams {
+    creepName: string
+};
