@@ -1,7 +1,8 @@
 import { SpawningOptions } from "Spawn/interfaces";
+import { StringMap } from "common/interfaces";
 
 export type ICreepRunner = {
-    runRole: (creepName: string) => Generator;
+    runRole: (creepName: string, cache: StringMap<any>) => Generator;
 };
 
 export type ICreepBuilder = {
