@@ -44,4 +44,8 @@ export class MinerHelper {
         const lowestSaturatedSource = sourceOptions.reduce((previous, current) => previous.workParts < current.workParts ? previous : current);
         return lowestSaturatedSource.source;
     }
+
+    public static GetMiningContainer(source: Source): StructureContainer | null {
+        throw new Error("Not Implemented");
+    }
 }

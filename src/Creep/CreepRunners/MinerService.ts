@@ -15,6 +15,34 @@ export const MinerService: ICreepRunner = {
             CreepRepo.SetCreepMemoryTarget(creep, targetSource.id);
         }
 
+        let range;
+        let moveTarget;
+        const miningContainer = MinerHelper.GetMiningContainer(targetSource);
+        if(miningContainer !== null) {
+            range = 0;
+            moveTarget = miningContainer;
+        }
+        else {
+            range = 1;
+            moveTarget = targetSource;
+        }
+
+        const working = CreepRepo.GetCreepWorkingStatus(creep);
+        const inRangeOfMoveTarget = creep.pos.inRangeTo(moveTarget.pos, range);
+        if(!working && inRangeOfMoveTarget) {
+            CreepRepo.SetCreepWorkingStatus(creep, true);
+        }
+        if(working && !inRangeOfMoveTarget) {
+            CreepRepo.SetCreepWorkingStatus(creep, false);
+        }
+
+        if(working) {
+            creep.harvest(targetSource);
+        }
+        else {
+            creep.moveTo(moveTarget);
+        }
+
         yield ThreadState.SUSPEND;
     }
 }
