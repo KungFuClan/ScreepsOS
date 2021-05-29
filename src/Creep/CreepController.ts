@@ -3,7 +3,7 @@ import { runCreep as CreepRunner } from "Creep/CreepService";
 import { Thread } from "OperatingSystem/thread";
 import { kernel } from 'OperatingSystem/kernel';
 
-interface IRunCreepParams {
+export interface IRunCreepParams {
     creepName: string
 };
 
