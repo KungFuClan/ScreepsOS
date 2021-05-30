@@ -14,7 +14,7 @@ const _logger = new Logger("MinerService");
 export const MinerService: ICreepRunner = {
     *runRole (this: Thread<IRunCreepParams>, creepName: string): Generator {
 
-        const cache: StringMap<any> = {}
+        const cache: StringMap<RoomObject | null> = {}
 
         while(Game.creeps[creepName]) {
 
@@ -27,16 +27,16 @@ export const MinerService: ICreepRunner = {
             }
 
             if(!cache[MiningContainer]){
-                cache[MiningContainer] = cache[MiningContainer] ?  cache[MiningContainer] : MinerHelper.GetMiningContainer(targetSource);
+                cache[MiningContainer] = MinerHelper.GetMiningContainer(targetSource);
             }
 
             const miningContainer = cache[MiningContainer];
             let range: number;
             let moveTarget: RoomObject;
 
-            if(miningContainer !== null) {
+            if(miningContainer) {
                 range = 0;
-                moveTarget = miningContainer;
+                moveTarget = miningContainer.safe<StructureContainer>();
             }
             else {
                 range = 1;
