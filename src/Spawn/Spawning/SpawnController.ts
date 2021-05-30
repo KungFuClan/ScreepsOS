@@ -2,7 +2,7 @@ import { EmpireRepo } from 'Repositories/EmpireRepo';
 import { Thread } from 'OperatingSystem/thread';
 import { kernel } from 'OperatingSystem/kernel';
 import { runRoomParams } from 'Spawn/SpawnQueue/RoomSpawnQueueService';
-import { runRoomSpawn } from './RoomSpawnService';
+import { runRoomSpawns } from './RoomSpawnService';
 import { sleep } from 'OperatingSystem/loopScheduler';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -20,10 +20,8 @@ function * runSpawnMain(this: Thread<any>): Generator<unknown,any,unknown> {
         const ownedRooms = EmpireRepo.getRooms_My();
 
         for(const room of ownedRooms) {
-            if(!this.process.hasThread(room.name)) {
-                // ! Noticed mismatch in thread name + createThread name here, and looking and implementation it seems like the process names get
-                // ! attached at thread creation and at hasThread, so I think these parameters need to be the same value
-                this.process.createThread<runRoomParams>(`spawnManager_${room.name}`, runRoomSpawn, {roomName: room.name});
+            if(!this.process.hasThread(`spawnManager_${room.name}`)) {
+                this.process.createThread<runRoomParams>(`spawnManager_${room.name}`, runRoomSpawns, {roomName: room.name});
             }
         }
 

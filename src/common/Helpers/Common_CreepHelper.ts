@@ -16,5 +16,18 @@ export class CommonCreepHelper {
 
     }
 
+    public static BodyPartCount(body: BodyPartConstant[], partToCount: BodyPartConstant): number {
 
+        let partCount = 0;
+
+        for(const part of body) {
+            if(part === partToCount) {
+                partCount++
+            }
+        }
+
+        return partCount;
+
+    }
 }
+

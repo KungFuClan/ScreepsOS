@@ -1,3 +1,4 @@
+import { BodyArrayModifier, BodyArrayStyle, BodyPartsUtil } from "Spawn/BodyParts";
 import { SpawnQueueObject, spawnQueue } from "./SpawnQueue";
 
 import { Logger } from "utils/Logger";
@@ -40,9 +41,15 @@ function queueMiners(roomName: string, spawnOptions: SpawningOptions = {}) {
         for(let i = 0; i < numCreepsNeeded; i++) {
 
             const newSpawn: SpawnQueueObject = {
-                body,
+                body: BodyPartsUtil.getPartsArray(body, BodyArrayStyle.GROUPED, []),
                 requestingRoom: roomName,
                 role: RoleConstants.MINER,
+                memory: {
+                    homeRoom: roomName,
+                    targetRoom: roomName,
+                    role: RoleConstants.MINER,
+                    working: false
+                },
                 validator: undefined
             }
 

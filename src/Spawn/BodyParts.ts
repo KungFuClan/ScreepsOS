@@ -98,13 +98,26 @@ export class BodyPartsUtil {
 
     }
 
-    public static getPartsCost(body: BodyDefinition): number {
+    public static getPartsCost(body: BodyDefinition ): number {
 
         let sum = 0;
 
         for(const part in body) {
 
             sum += BODYPART_COST[part as BodyPartConstant] * body[part]!;
+
+        }
+
+        return sum;
+    }
+
+    public static getPartsArrayCost(body: BodyPartConstant[] ): number {
+
+        let sum = 0;
+
+        for(const part of body) {
+
+            sum += BODYPART_COST[part];
 
         }
 

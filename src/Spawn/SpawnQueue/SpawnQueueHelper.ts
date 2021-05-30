@@ -33,7 +33,7 @@ export class SpawnQueueHelper {
                 continue;
             }
 
-            targetPartCount += request.body[part] || 0;
+            targetPartCount += CommonCreepHelper.BodyPartCount(request.body, part);
         }
 
         return targetPartCount;

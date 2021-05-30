@@ -5,15 +5,17 @@ import { RoleConstants } from "Creep/interfaces/CreepConstants";
 
 export interface SpawnQueueObject {
     role: RoleConstants,
-    body: BodyDefinition,
+    body: BodyPartConstant[],
     requestingRoom: string,
+    memory: CreepMemory,
     validator: undefined | ((...args: any) => boolean)
 }
 
 export interface SerializedSpawnQueueObject {
     role: RoleConstants,
-    body: string,
+    body: BodyPartConstant[],
     requestingRoom: string,
+    memory: CreepMemory
 }
 
 export class SpawnQueue { // extends Array<SpawnQueueObject>{
@@ -59,15 +61,22 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
         return result;
     }
 
-    public *[Symbol.iterator](): IterableIterator<SpawnQueueObject> {
+    public delete(obj: SpawnQueueObject): void {
 
-        for(const val of this.spawnQueue) {
-            yield val;
+        const indexOf = this.spawnQueue.findIndex(value => JSON.stringify(obj) === JSON.stringify(value));
+
+        if(indexOf > -1) {
+            this.spawnQueue.splice(indexOf, 1);
         }
 
     }
 
-    // TODO actually implement this
+    public *[Symbol.iterator](): IterableIterator<SpawnQueueObject> {
+        for(const val of this.spawnQueue) {
+            yield val;
+        }
+    }
+
     public serializeToMemory(...items: SpawnQueueObject[]): void {
 
         const serializedQueue: SerializedSpawnQueueObject[] = new Array(items.length);
@@ -79,9 +88,10 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
             const obj = items[i];
 
             serializedQueue[i] = {
-                body: BodyPartsUtil.serializeBody(obj.body),
+                body: obj.body,
                 requestingRoom: obj.requestingRoom,
-                role: obj.role
+                role: obj.role,
+                memory: obj.memory
             };
 
         }
@@ -89,10 +99,12 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
         Memory.spawnQueue = serializedQueue;
     }
 
-    // TODO actually implement this
     public static deserializeMemory(items: SerializedSpawnQueueObject[]): SpawnQueueObject[] {
         const deserializedQueue: SpawnQueueObject[] = [];
 
+        if(items === undefined || items.length === 0) {
+            return [];
+        }
         // * Specifically using for loop to preserve array order.
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for(let i = 0; i < items.length; i++) {
@@ -100,9 +112,10 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
             const obj = items[i];
 
             deserializedQueue[i] = {
-                body: BodyPartsUtil.deserializeBody(obj.body),
+                body: obj.body,
                 requestingRoom: obj.requestingRoom,
                 role: obj.role,
+                memory: obj.memory,
                 validator: undefined
             }
         }
