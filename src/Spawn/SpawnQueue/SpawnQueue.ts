@@ -91,8 +91,23 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
 
     // TODO actually implement this
     public static deserializeMemory(items: SerializedSpawnQueueObject[]): SpawnQueueObject[] {
-        const deserialized: SpawnQueueObject[] = [];
-        return deserialized;
+        const deserializedQueue: SpawnQueueObject[] = [];
+
+        // * Specifically using for loop to preserve array order.
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
+        for(let i = 0; i < items.length; i++) {
+
+            const obj = items[i];
+
+            deserializedQueue[i] = {
+                body: BodyPartsUtil.deserializeBody(obj.body),
+                requestingRoom: obj.requestingRoom,
+                role: obj.role,
+                validator: undefined
+            }
+        }
+
+        return deserializedQueue;
     }
 }
 
