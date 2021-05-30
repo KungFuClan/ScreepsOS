@@ -3,6 +3,7 @@ import { CreepRepo } from "Repositories/CreepRepo";
 import { Logger } from "utils/Logger";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
 import _ from "lodash";
+import { structureRepo } from "Repositories/StructureRepo";
 
 const _logger = new Logger("MinerHelper");
 
@@ -45,8 +46,15 @@ export class MinerHelper {
         return lowestSaturatedSource.source;
     }
 
+    /**
+     * Get the mining container for the specified source
+     * @param source The source we are getting the mining container for
+     * @returns The closest container if it exists
+     */
     public static GetMiningContainer(source: Source): StructureContainer | null {
-        return null;
-        // throw new Error("Not Implemented");
+        const containers = structureRepo.getStructure(STRUCTURE_CONTAINER, source.room.name);
+        if(!containers) return null;
+        const closestContainer = source.pos.findClosestByRange(containers) as StructureContainer;
+        return source.pos.isNearTo(closestContainer.pos) ? closestContainer : null;
     }
 }
