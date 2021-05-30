@@ -21,7 +21,7 @@ export function * runRoomSpawns (this: Thread<{roomName: string}> , roomName: st
 
         for(const spawn of spawns) {
 
-            energyAvailable -= yield * runSpawn(spawn, energyAvailable);
+            energyAvailable -= yield * runSpawn(spawn.safe(), energyAvailable);
 
             yield ThreadState.RESUME;
         }
@@ -63,7 +63,8 @@ function * runSpawn(spawn: StructureSpawn, energyAvailable: number): Generator<b
 
     spawnQueue.delete(reqToSpawn);
 
-    spawn.spawnCreep(reqToSpawn.body, `${reqToSpawn.role}${spawn.name}${Game.time.toString().slice(-4)}`, {memory: reqToSpawn.memory});
+    spawn.safe<StructureSpawn>()
+        .spawnCreep(reqToSpawn.body, `${reqToSpawn.role}${spawn.name}${Game.time.toString().slice(-4)}`, {memory: reqToSpawn.memory});
 
     return costToSpawn;
 }

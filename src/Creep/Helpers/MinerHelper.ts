@@ -52,9 +52,10 @@ export class MinerHelper {
      * @returns The closest container if it exists
      */
     public static GetMiningContainer(source: Source): StructureContainer | null {
-        const containers = structureRepo.getStructure(STRUCTURE_CONTAINER, source.room.name);
-        if(!containers) return null;
-        const closestContainer = source.pos.findClosestByRange(containers) as StructureContainer;
+        const containers = structureRepo.getStructure<StructureContainer>(STRUCTURE_CONTAINER, source.room.name);
+        if(containers.length === 0) return null;
+        const closestContainer = source.pos.findClosestByRange(containers);
+        if(!closestContainer) return null;
         return source.pos.isNearTo(closestContainer.pos) ? closestContainer : null;
     }
 }
