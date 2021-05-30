@@ -1,3 +1,4 @@
+import { BodyDefinition } from "Spawn/BodyParts";
 import { SpawningOptions } from "Spawn/interfaces";
 import { StringMap } from "common/interfaces";
 
@@ -6,7 +7,7 @@ export type ICreepRunner = {
 };
 
 export type ICreepBuilder = {
-    runBuilder: (roomName: string, spawnOptions: SpawningOptions) => Generator;
+    runBuilder: (roomName: string, spawnOptions: SpawningOptions) => BodyDefinition;
 }
 
 export interface IRunCreepParams {

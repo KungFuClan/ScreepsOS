@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-namespace */
+
 import "importProcesses";
 import "OperatingSystem/SafeObject";
 
 import { ErrorMapper } from "utils/ErrorMapper";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
+import { SerializedSpawnQueueObject } from "Spawn/SpawnQueue/SpawnQueue";
 import { kernel } from "OperatingSystem/kernel";
-
 
 declare global {
   interface Memory {
     uuid: number;
     log: any;
+    spawnQueue: SerializedSpawnQueueObject[]
   }
 
   interface CreepMemory {

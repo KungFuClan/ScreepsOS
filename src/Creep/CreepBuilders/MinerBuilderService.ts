@@ -2,17 +2,12 @@ import { EnergyTier, SpawningOptions } from "Spawn/interfaces";
 
 import { BodyDefinition } from "Spawn/BodyParts";
 import { CommonRoomHelper } from "common/Helpers/Common_RoomHelper";
+import { CreepBuilderHelper } from "./CreepBuilderHelper";
 import { ICreepBuilder } from "Creep/interfaces/interfaces";
 
 export const MinerBuilder: ICreepBuilder = {
 
-    * runBuilder(roomName: string, spawnOptions?: SpawningOptions): Generator {
-
-        if(!spawnOptions) {
-            spawnOptions = {
-                offRoad: false
-            }
-        }
+    runBuilder(roomName: string, spawnOptions: SpawningOptions = {}): BodyDefinition {
 
         const roomEnergyTier = spawnOptions.energyTier || CommonRoomHelper.getEnergyTier(roomName);
 
@@ -24,27 +19,26 @@ export const MinerBuilder: ICreepBuilder = {
 
             case(EnergyTier.T1):
                 body[WORK] = 2;
-                body[MOVE] = spawnOptions.offRoad ? 2 : 1;
+                body[MOVE] = 2;
                 break;
             case(EnergyTier.T2):
-                body[WORK] = 3;
+                body[WORK] = 5;
+                body[MOVE] = 1;
                 break;
             case(EnergyTier.T3):
-                body[WORK] = 5;
-                break
             case(EnergyTier.T4):
-                break;
             case(EnergyTier.T5):
-                break;
             case(EnergyTier.T6):
-                break;
             case(EnergyTier.T7):
-                break;
             case(EnergyTier.T8):
+                body[WORK] = 5;
+                body[MOVE] = 3;
                 break;
         }
 
-        yield;
+        CreepBuilderHelper.AdjustForSpawnOptions(body, roomName, spawnOptions);
+
+        return body;
     }
 
 }

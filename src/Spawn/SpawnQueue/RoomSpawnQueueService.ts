@@ -1,7 +1,12 @@
+import { SpawnQueueObject, spawnQueue } from "./SpawnQueue";
+
+import { Logger } from "utils/Logger";
+import { MinerBuilder } from "Creep/CreepBuilders/MinerBuilderService";
+import { RoleConstants } from "Creep/interfaces/CreepConstants";
 import { SpawnQueueHelper } from "./SpawnQueueHelper";
 import {SpawningOptions} from "../interfaces";
 import { Thread } from "OperatingSystem/thread";
-import { spawn } from "child_process";
+import { ThreadState } from "OperatingSystem/interfaces";
 
 export type runRoomParams = { roomName: string };
 
@@ -11,19 +16,39 @@ export function * runRoomSpawnQueue(this: Thread<runRoomParams>, roomName: strin
     while(true) {
 
 
+        queueMiners(roomName);
+        yield ThreadState.RESUME;
 
 
-       yield `SpawnQueue_${roomName} did not submit spawn request.`;
+        yield ThreadState.SUSPEND;
 
     }
 }
 
-function numMinersToQueue(roomName: string, spawnOptions: SpawningOptions) {
+function queueMiners(roomName: string, spawnOptions: SpawningOptions = {}) {
 
-        const numWorkPartsNeeded = SpawnQueueHelper.WorkPartsNeededForMining(roomName) - SpawnQueueHelper.GetExistingMinerWorkParts(roomName);
+        const workPartsNeeded: number = SpawnQueueHelper.WorkPartsNeededForMining(roomName) - SpawnQueueHelper.GetExistingRoleParts(roomName, RoleConstants.MINER, WORK) - SpawnQueueHelper.GetQueuedRoleParts(roomName, RoleConstants.MINER, WORK);
 
-        const remainingCapacity = Game.rooms[roomName].energyCapacityAvailable;
+        if(workPartsNeeded === 0) {
+            return;
+        }
 
+        const body = MinerBuilder.runBuilder(roomName, spawnOptions);
 
+        const numCreepsNeeded = Math.ceil(workPartsNeeded / body[WORK]!);
 
+        for(let i = 0; i < numCreepsNeeded; i++) {
+
+            const newSpawn: SpawnQueueObject = {
+                body,
+                requestingRoom: roomName,
+                role: RoleConstants.MINER,
+                validator: undefined
+            }
+
+            // Logger.withPrefix('[RoomSpawn_QueueMiners]').debug("Created creep " + JSON.stringify(newSpawn));
+
+            spawnQueue.unshift(newSpawn);
+
+        }
 }

@@ -2,7 +2,26 @@
 export type SpawningOptions = {
     offRoad?: boolean,
     energyTier?: EnergyTier,
-
+    multiplyParts?: {
+        [WORK]?: number,
+        [MOVE]?: number,
+        [CARRY]?: number,
+        [CLAIM]?: number
+        [ATTACK]?: number,
+        [RANGED_ATTACK]?: number,
+        [HEAL]?: number,
+        [TOUGH]?: number,
+    },
+    addParts?: {
+        [WORK]?: number,
+        [MOVE]?: number,
+        [CARRY]?: number,
+        [CLAIM]?: number
+        [ATTACK]?: number,
+        [RANGED_ATTACK]?: number,
+        [HEAL]?: number,
+        [TOUGH]?: number,
+    }
 }
 
 export enum EnergyTier {

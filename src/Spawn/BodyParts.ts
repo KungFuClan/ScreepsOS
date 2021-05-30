@@ -21,6 +21,7 @@ export enum BodyArrayModifier {
     TOUGH_FIRST = 0,
     HEAL_LAST = 1
 }
+
 export class BodyPartsUtil {
 
     public static getPartsArray(body: BodyDefinition, bodyStyle: BodyArrayStyle, bodyModifiers: BodyArrayModifier[]): BodyPartConstant[] {

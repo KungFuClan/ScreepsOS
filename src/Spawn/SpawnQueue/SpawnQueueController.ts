@@ -1,18 +1,13 @@
+import { SpawnQueue, spawnQueue } from "./SpawnQueue";
 import { runRoomParams, runRoomSpawnQueue } from "./RoomSpawnQueueService";
-import { EmpireRepo } from "Repositories/EmpireRepo";
-import { Thread } from "OperatingSystem/thread";
-import { kernel } from "OperatingSystem/kernel";
-import { sleep } from "OperatingSystem/loopScheduler";
 
-export interface SpawnQueueObject {
-    creepRole: string,
-    requestingRoom: string,
-    validator: undefined | ((...args: any) => boolean)
-}
+import { EmpireRepo } from "Repositories/EmpireRepo";
+import { Logger } from "utils/Logger";
+import { Thread } from "OperatingSystem/thread";
+import { ThreadState } from "OperatingSystem/interfaces";
+import { kernel } from "OperatingSystem/kernel";
 
 kernel.createProcess('SpawnQueueController', runSpawnQueueMain, {});
-
-export const spawnQueue = new Map<string,SpawnQueueObject>();
 
 function * runSpawnQueueMain(this: Thread): Generator<unknown, any, unknown> {
 
@@ -26,7 +21,11 @@ function * runSpawnQueueMain(this: Thread): Generator<unknown, any, unknown> {
             }
         }
 
-        yield * sleep(5);
+        Logger.withPrefix('[SpawnQueueController]').debug(`Next in Queue: ${JSON.stringify(spawnQueue.at(0))}\nTotal Queue Length: ${spawnQueue.length}`);
+
+        yield ThreadState.SUSPEND;
+
+        // yield * sleep(5);
     }
 
 }
