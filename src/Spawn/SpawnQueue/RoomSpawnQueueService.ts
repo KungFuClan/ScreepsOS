@@ -1,15 +1,14 @@
-import { BodyArrayModifier, BodyArrayStyle, BodyPartsUtil } from "Spawn/BodyParts";
-import { SpawnQueueObject, spawnQueue } from "./SpawnQueue";
+import { BodyArrayStyle, BodyPartsUtil } from "Spawn/BodyParts";
+import { SpawnQueueObject, SpawningOptions } from "../interfaces";
 
 import { CreepRepo } from "Repositories/CreepRepo";
-import { Logger } from "utils/Logger";
 import { MinerBuilder } from "Creep/CreepBuilders/MinerBuilderService";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
 import { SpawnQueueHelper } from "./SpawnQueueHelper";
-import {SpawningOptions} from "../interfaces";
 import { TenderBuilder } from "Creep/CreepBuilders/TenderBuilderService";
 import { Thread } from "OperatingSystem/thread";
 import { ThreadState } from "OperatingSystem/interfaces";
+import { spawnQueue } from "./SpawnQueue";
 
 export type runRoomParams = { roomName: string };
 
@@ -40,7 +39,7 @@ function queueMiners(roomName: string, spawnOptions: SpawningOptions = {}): void
 
         const numCreepsNeeded = Math.ceil(workPartsNeeded / bodyDefinition[WORK]!);
 
-        let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.MINER]).length > 0 ? 2 : 1;
+        let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.MINER]).length > 0 ? spawnOptions.priority || 2 : 1;
         const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.GROUPED, []);
 
         for(let i = 0; i < numCreepsNeeded; i++) {
@@ -63,7 +62,7 @@ function queueMiners(roomName: string, spawnOptions: SpawningOptions = {}): void
 
             spawnQueue.unshift(newSpawn);
 
-            priority = 2; // So that only the first of the creeps will be priority 1 ever
+            priority = spawnOptions.priority || 2; // So that only the first of the creeps will be priority 1, unless specified
 
         }
 }
@@ -80,7 +79,7 @@ function queueTenders(roomName: string, spawnOptions: SpawningOptions = {}): voi
 
     const numCreepsNeeded = Math.ceil(carryPartsNeeded / bodyDefinition[CARRY]!);
 
-    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.TENDER]).length > 0 ? 2 : 1;
+    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.TENDER]).length > 0 ? spawnOptions.priority || 2 : 1;
     const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.GROUPED, []);
 
     for(let i = 0; i < numCreepsNeeded; i++) {
@@ -103,7 +102,7 @@ function queueTenders(roomName: string, spawnOptions: SpawningOptions = {}): voi
 
         spawnQueue.unshift(newSpawn);
 
-        priority = 2; // So that only the first of the creeps will be priority 1 ever
+        priority = spawnOptions.priority || 2; // So that only the first of the creeps will be priority 1 ever
 
     }
 }

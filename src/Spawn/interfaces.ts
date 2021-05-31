@@ -1,3 +1,27 @@
+import { RoleConstants } from "Creep/interfaces/CreepConstants";
+
+export enum Priority {
+    HIGH = 1,
+    NORMAL = 2,
+    LOW = 3
+}
+
+export interface SpawnQueueObject {
+    role: RoleConstants,
+    body: BodyPartConstant[],
+    requestingRoom: string,
+    memory: CreepMemory,
+    priority: number,
+    validator: undefined | ((...args: any) => boolean)
+}
+
+export interface SerializedSpawnQueueObject {
+    role: RoleConstants,
+    body: BodyPartConstant[],
+    requestingRoom: string,
+    memory: CreepMemory,
+    priority: number
+}
 
 export type SpawningOptions = {
     offRoad?: boolean,
@@ -21,7 +45,8 @@ export type SpawningOptions = {
         [RANGED_ATTACK]?: number,
         [HEAL]?: number,
         [TOUGH]?: number,
-    }
+    },
+    priority?: Priority
 }
 
 export enum EnergyTier {

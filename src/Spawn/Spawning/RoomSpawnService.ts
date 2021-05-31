@@ -1,8 +1,9 @@
-import { Priority, SpawnQueue, SpawnQueueObject, spawnQueue } from "Spawn/SpawnQueue/SpawnQueue";
+import { Priority, SpawnQueueObject } from "Spawn/interfaces";
 
 import { BodyPartsUtil } from "Spawn/BodyParts";
 import { Thread } from "OperatingSystem/thread";
 import { ThreadState } from "OperatingSystem/interfaces";
+import { spawnQueue } from "Spawn/SpawnQueue/SpawnQueue";
 import { structureRepo } from "Repositories/StructureRepo";
 
 export type runRoomParams = { roomName: string };

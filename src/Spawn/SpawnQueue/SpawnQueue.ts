@@ -1,30 +1,6 @@
-import { BodyDefinition, BodyPartsUtil } from "Spawn/BodyParts";
+import { SerializedSpawnQueueObject, SpawnQueueObject } from "Spawn/interfaces";
 
 import { Logger } from "utils/Logger";
-import { RoleConstants } from "Creep/interfaces/CreepConstants";
-
-export interface SpawnQueueObject {
-    role: RoleConstants,
-    body: BodyPartConstant[],
-    requestingRoom: string,
-    memory: CreepMemory,
-    priority: number,
-    validator: undefined | ((...args: any) => boolean)
-}
-
-export interface SerializedSpawnQueueObject {
-    role: RoleConstants,
-    body: BodyPartConstant[],
-    requestingRoom: string,
-    memory: CreepMemory,
-    priority: number
-}
-
-export enum Priority {
-    HIGH = 1,
-    NORMAL = 2,
-    LOW = 3
-}
 
 export class SpawnQueue { // extends Array<SpawnQueueObject>{
 
