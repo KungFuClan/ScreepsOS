@@ -1,3 +1,5 @@
+import { StructureRepo, structureRepo } from "Repositories/StructureRepo";
+
 import { CommonCreepHelper } from "common/Helpers/Common_CreepHelper";
 import { CommonRoomHelper } from "common/Helpers/Common_RoomHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
@@ -69,6 +71,33 @@ export class SpawnQueueHelper {
 
     }
 
+    public static CarryPartsNeededForTender(roomName: string, capacity = 1.0): number {
 
+        const sources = RoomRepo.GetAllSources_ByRoom(roomName);
+        const room = Game.rooms[roomName];
+        const returnPoints: Structure[] = []; // Places in the room we will return the energy to
+
+        if(room.storage) returnPoints.push(room.storage);
+        if(room.terminal) returnPoints.push(room.terminal);
+
+        if(returnPoints.length === 0) {
+            const spawns = structureRepo.getStructure_My<StructureSpawn>(STRUCTURE_SPAWN, roomName);
+            _.forEach(spawns, spawn => returnPoints.push(spawn));
+        }
+
+        let carryPartsNeeded = 0;
+
+        for(const source of sources) {
+
+            const averageDistToSource = _.sum(returnPoints, rp => rp.pos.getRangeTo(source));
+
+            const tripsPerCycle = 300 / (averageDistToSource * 2);
+
+            carryPartsNeeded += source.energyCapacity / tripsPerCycle / 50;
+
+        }
+
+        return carryPartsNeeded * capacity;
+    }
 }
 

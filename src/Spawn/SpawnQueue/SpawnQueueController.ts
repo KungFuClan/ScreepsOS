@@ -21,7 +21,7 @@ function * runSpawnQueueMain(this: Thread): Generator<unknown, any, unknown> {
             }
         }
 
-        Logger.withPrefix('[SpawnQueueController]').debug(`Next in Queue: ${JSON.stringify(spawnQueue.at(0))}\nTotal Queue Length: ${spawnQueue.length}`);
+        // Logger.withPrefix('[SpawnQueueController]').debug(`Next in Queue: ${JSON.stringify(spawnQueue.at(0))}\nTotal Queue Length: ${spawnQueue.length}`);
 
         yield ThreadState.SUSPEND;
 
