@@ -24,4 +24,6 @@ export function * runCreep (this: Thread<IRunCreepParams> , creepName: string): 
 
         yield ThreadState.SUSPEND;
     }
+
+    delete Memory.creeps[creepName];
 }
