@@ -3,7 +3,7 @@ import { ICreepRunner } from "Creep/interfaces/interfaces";
 import { StringMap } from "common/interfaces";
 import { ThreadState } from "OperatingSystem/interfaces";
 
-export const TenderService: ICreepRunner = {
+export const QueenService: ICreepRunner = {
     *runRole (creepName: string): Generator {
 
         const cache: StringMap<RoomObject | null> = {}
@@ -22,14 +22,17 @@ export const TenderService: ICreepRunner = {
             }
 
             if(working) {
-                // find storage/spawn
-                // if near
-                    // deposit/drop on ground
+                // find closest extension/spawn and set as target
+                // if near to it
+                    // fill extension
+                    // get next extension
+                    // if not near to it
+                        // move to extension
                 // if not
-                    // move to it
+                    // move towards it
             }
             else {
-                // find the mining container to fill from
+                // find container/storage to fill from
                 // if near
                     // get energy from it
                 // if not
