@@ -1,8 +1,9 @@
-import { SpawnQueueObject, spawnQueue } from "Spawn/SpawnQueue/SpawnQueue";
+import { Priority, SpawnQueueObject } from "Spawn/interfaces";
 
 import { BodyPartsUtil } from "Spawn/BodyParts";
 import { Thread } from "OperatingSystem/thread";
 import { ThreadState } from "OperatingSystem/interfaces";
+import { spawnQueue } from "Spawn/SpawnQueue/SpawnQueue";
 import { structureRepo } from "Repositories/StructureRepo";
 
 export type runRoomParams = { roomName: string };
@@ -21,7 +22,7 @@ export function * runRoomSpawns (this: Thread<{roomName: string}> , roomName: st
 
         for(const spawn of spawns) {
 
-            energyAvailable -= yield * runSpawn(spawn.safe(), energyAvailable);
+            energyAvailable -= yield * runSpawn(spawn, energyAvailable);
 
             yield ThreadState.RESUME;
         }
@@ -34,28 +35,20 @@ export function * runRoomSpawns (this: Thread<{roomName: string}> , roomName: st
 
 function * runSpawn(spawn: StructureSpawn, energyAvailable: number): Generator<boolean, number, unknown> {
 
-    let costToSpawn = 0;
+    const costToSpawn = 0;
 
-    if(spawn.spawning) {
+    if(spawn.safe<StructureSpawn>().spawning) {
         return 0;
     }
 
     let reqToSpawn: SpawnQueueObject | undefined;
-    for(const req of spawnQueue) {
 
-        if(req.requestingRoom !== spawn.room.name) {
-            continue;
-        }
-
-        costToSpawn = BodyPartsUtil.getPartsArrayCost(req.body)
-        if(costToSpawn <= energyAvailable) {
-            reqToSpawn = req;
+    for(let priority = 1; priority <= 3; priority++) {
+        if(reqToSpawn === undefined) {
+            reqToSpawn = getNextReqToSpawn(spawn.room.name, priority, energyAvailable);
+            yield ThreadState.RESUME;
         }
     }
-
-    yield ThreadState.RESUME;
-
-    // * This is where we would look for other room spawns to fill if we do not have one yet, then yield
 
     if(reqToSpawn === undefined) {
         return 0;
@@ -67,4 +60,21 @@ function * runSpawn(spawn: StructureSpawn, energyAvailable: number): Generator<b
         .spawnCreep(reqToSpawn.body, `${reqToSpawn.role}${spawn.name}${Game.time.toString().slice(-4)}`, {memory: reqToSpawn.memory});
 
     return costToSpawn;
+}
+
+function getNextReqToSpawn(roomName: string, priority: Priority, energyAvailable: number): SpawnQueueObject | undefined {
+
+    for(const req of spawnQueue) {
+
+        if(req.requestingRoom !== roomName) continue;
+        if(req.priority !== priority) continue;
+
+        const costToSpawn = BodyPartsUtil.getPartsArrayCost(req.body)
+        if(costToSpawn <= energyAvailable) {
+            return req;
+        }
+    }
+
+    return undefined;
+
 }

@@ -1,22 +1,6 @@
-import { BodyDefinition, BodyPartsUtil } from "Spawn/BodyParts";
+import { SerializedSpawnQueueObject, SpawnQueueObject } from "Spawn/interfaces";
 
 import { Logger } from "utils/Logger";
-import { RoleConstants } from "Creep/interfaces/CreepConstants";
-
-export interface SpawnQueueObject {
-    role: RoleConstants,
-    body: BodyPartConstant[],
-    requestingRoom: string,
-    memory: CreepMemory,
-    validator: undefined | ((...args: any) => boolean)
-}
-
-export interface SerializedSpawnQueueObject {
-    role: RoleConstants,
-    body: BodyPartConstant[],
-    requestingRoom: string,
-    memory: CreepMemory
-}
 
 export class SpawnQueue { // extends Array<SpawnQueueObject>{
 
@@ -36,13 +20,13 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
 
     public push(...items: SpawnQueueObject[]): number {
         const result = this.spawnQueue.push(...items);
-        this.serializeToMemory(...this.spawnQueue);
+        this.serializeToMemory(this.spawnQueue);
         return result;
     }
 
     public unshift(...items: SpawnQueueObject[]): number {
         const result = this.spawnQueue.unshift(...items);
-        this.serializeToMemory(...this.spawnQueue);
+        this.serializeToMemory(this.spawnQueue);
 
         Logger.withPrefix('[unshift]').debug(`Unshifted: ${JSON.stringify(items)} \nresult: ${result}`);
         Logger.withPrefix('[unshift]').debug(`${this.spawnQueue.length} ${this.spawnQueue[0]}`);
@@ -51,13 +35,13 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
 
     public pop(): SpawnQueueObject | undefined {
         const result = this.spawnQueue.pop();
-        this.serializeToMemory(...this.spawnQueue);
+        this.serializeToMemory(this.spawnQueue);
         return result;
     }
 
     public shift(): SpawnQueueObject | undefined {
         const result = this.spawnQueue.shift();
-        this.serializeToMemory(...this.spawnQueue);
+        this.serializeToMemory(this.spawnQueue);
         return result;
     }
 
@@ -77,9 +61,9 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
         }
     }
 
-    public serializeToMemory(...items: SpawnQueueObject[]): void {
+    public serializeToMemory(items: SpawnQueueObject[]): void {
 
-        const serializedQueue: SerializedSpawnQueueObject[] = new Array(items.length);
+        const serializedQueue: SerializedSpawnQueueObject[] = [];
 
         // * Specifically using for loop to preserve array order.
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
@@ -91,7 +75,8 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
                 body: obj.body,
                 requestingRoom: obj.requestingRoom,
                 role: obj.role,
-                memory: obj.memory
+                memory: obj.memory,
+                priority: obj.priority
             };
 
         }
@@ -116,6 +101,7 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
                 requestingRoom: obj.requestingRoom,
                 role: obj.role,
                 memory: obj.memory,
+                priority: obj.priority,
                 validator: undefined
             }
         }
