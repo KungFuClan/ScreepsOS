@@ -81,7 +81,7 @@ export class SpawnQueue { // extends Array<SpawnQueueObject>{
 
         }
 
-        Memory.spawnQueue = serializedQueue;
+        // Memory.spawnQueue = serializedQueue;
     }
 
     public static deserializeMemory(items: SerializedSpawnQueueObject[]): SpawnQueueObject[] {

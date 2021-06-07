@@ -6,7 +6,7 @@ import "OperatingSystem/SafeObject";
 
 import { ErrorMapper } from "utils/ErrorMapper";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
-import { SerializedSpawnQueueObject } from "Spawn/SpawnQueue/SpawnQueue";
+import { SerializedSpawnQueueObject } from "Spawn/interfaces";
 import { kernel } from "OperatingSystem/kernel";
 
 declare global {
