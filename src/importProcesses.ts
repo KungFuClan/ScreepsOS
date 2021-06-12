@@ -1,3 +1,4 @@
+import "Pathfinding/Traveler";
 import "Creep/interfaces/CreepConstants"
 import "Repositories/CreepRepo"
 import "OperatingSystem/SafeObject";

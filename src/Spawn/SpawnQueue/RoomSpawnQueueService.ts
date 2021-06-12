@@ -2,6 +2,7 @@ import { BodyArrayStyle, BodyPartsUtil } from "Spawn/BodyParts";
 import { SpawnQueueObject, SpawningOptions } from "../interfaces";
 
 import { CreepRepo } from "Repositories/CreepRepo";
+import { DeckhandBuilder } from "Creep/CreepBuilders/DeckhandBuilderService";
 import { MinerBuilder } from "Creep/CreepBuilders/MinerBuilderService";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
 import { SpawnQueueHelper } from "./SpawnQueueHelper";
@@ -20,7 +21,9 @@ export function * runRoomSpawnQueue(this: Thread<runRoomParams>, roomName: strin
 
         queueMiners(roomName); yield ThreadState.RESUME;
 
-        queueTenders(roomName); yield ThreadState.RESUME
+        queueTenders(roomName); yield ThreadState.RESUME;
+
+        queueDeckhands(roomName); yield ThreadState.RESUME;
 
         yield ThreadState.SUSPEND;
 
@@ -104,5 +107,43 @@ function queueTenders(roomName: string, spawnOptions: SpawningOptions = {}): voi
 
         priority = spawnOptions.priority || 2; // So that only the first of the creeps will be priority 1 ever
 
+    }
+}
+
+function queueDeckhands(roomName: string, spawnOptions: SpawningOptions = {}): void {
+
+    // TODO How do we want to target controller upgrade % / builders needed
+    const workPartsNeeded = 10 - SpawnQueueHelper.GetExistingRoleParts(roomName, RoleConstants.DECKHAND, WORK) - SpawnQueueHelper.GetQueuedRoleParts(roomName, RoleConstants.DECKHAND, WORK);
+
+    if(workPartsNeeded === 0) {
+        return;
+    }
+
+    const bodyDefinition = DeckhandBuilder.runBuilder(roomName, spawnOptions);
+
+    const numCreepsNeeded = Math.ceil(workPartsNeeded / bodyDefinition[WORK]!);
+
+    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.DECKHAND]).length > 0 ? spawnOptions.priority || 2 : 1;
+
+    const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.COLLATED, []);
+
+    for(let i = 0; i < numCreepsNeeded; i++) {
+        const newSpawn: SpawnQueueObject = {
+            body,
+            requestingRoom: roomName,
+            role: RoleConstants.DECKHAND,
+            memory: {
+                homeRoom: roomName,
+                targetRoom: roomName,
+                role: RoleConstants.DECKHAND,
+                working: false
+            },
+            priority,
+            validator: undefined
+        }
+
+        spawnQueue.unshift(newSpawn);
+
+        priority = spawnOptions.priority || 2;
     }
 }

@@ -7,6 +7,7 @@ import "OperatingSystem/SafeObject";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { RoleConstants } from "Creep/interfaces/CreepConstants";
 import { SerializedSpawnQueueObject } from "Spawn/interfaces";
+import { TravelData } from "Pathfinding/Traveler_Types";
 import { kernel } from "OperatingSystem/kernel";
 
 declare global {
@@ -22,11 +23,16 @@ declare global {
     targetRoom: string;
     working: boolean;
     target?: Id<RoomObject>;
+    _trav?: Partial<TravelData>;
   }
 
   interface RoomObject {
     safe: <T extends RoomObject>() => T;
     id: Id<this>;
+  }
+
+  interface RoomMemory {
+    avoid?: number;
   }
 }
 

@@ -18,15 +18,10 @@ export const DeckhandService: ICreepRunner = {
             const creep = Game.creeps[creepName].safe<Creep>();
 
             const working = CreepRepo.GetCreepWorkingStatus(creep);
-            const energyLevel = creep.store.getUsedCapacity();
-            if(working && energyLevel === 0) {
-                CreepRepo.SetCreepWorkingStatus(creep, false);
-            }
-            if(!working && energyLevel > 0) {
-                CreepRepo.SetCreepWorkingStatus(creep, true);
-            }
 
-            if(working) {
+            const energyLevel = creep.store.getUsedCapacity();
+
+            if(energyLevel > 0) {
 
                 if(!cache[UpgradeTarget]) {
 
@@ -49,7 +44,14 @@ export const DeckhandService: ICreepRunner = {
                     continue;
                 }
 
-                creep.upgradeController(target);
+                CreepRepo.SetCreepWorkingStatus(creep, true);
+
+                while(creep.store.energy > 0) {
+                    creep.upgradeController(target);
+                    yield ThreadState.SUSPEND;
+                }
+
+                CreepRepo.SetCreepWorkingStatus(creep, false);
 
                 yield ThreadState.SUSPEND;
                 continue;
@@ -80,6 +82,8 @@ export const DeckhandService: ICreepRunner = {
 
                 // TODO handle withdrawing for other structures instead - ideally just mask this as a custom action
                 creep.pickup(target as Resource);
+
+                delete cache[EnergyTarget];
 
                 yield ThreadState.SUSPEND;
                 continue;

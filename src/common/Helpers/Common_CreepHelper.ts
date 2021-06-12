@@ -1,4 +1,5 @@
 import { BodyArrayModifier } from "Spawn/BodyParts";
+import { PathfindingHelper } from "Pathfinding/PathfindingHelper";
 import { RoomRepo } from "Repositories/RoomRepo";
 
 export class CommonCreepHelper {
@@ -66,14 +67,22 @@ export class CommonCreepHelper {
     public static MoveTo(creep: Creep, target: _HasRoomPosition, targetRange = 0): boolean {
 
         const range = creep.pos.getRangeTo(target);
-        if(range === targetRange) {
+        if(range <= targetRange) {
             return false;
         }
 
-        creep.moveTo(target, {
-            ignoreCreeps: false,
-            visualizePathStyle: { lineStyle: "dashed", opacity: .25}
-        });
+        const opts = PathfindingHelper.GetDefaultMoveOpts(creep)
+        opts.range = targetRange;
+
+        if(target.pos.roomName === creep.pos.roomName) {
+            opts.maxRooms = 1;
+        }
+
+        // creep.moveTo(target,
+        //     opts
+        //     );
+
+        creep.travelTo(target, opts);
 
         return true;
     }
