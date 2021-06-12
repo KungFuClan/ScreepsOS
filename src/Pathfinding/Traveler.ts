@@ -533,7 +533,32 @@ export class Traveler {
      */
 
     public static addCreepsToMatrix(room: Room, matrix: CostMatrix): CostMatrix {
-        room.find(FIND_CREEPS).forEach((creep) => matrix.set(creep.pos.x, creep.pos.y, 0xff));
+        room.find(FIND_CREEPS).forEach((creep) => {
+            let matrixValue;
+
+            if (creep.my) {
+                if (creep.memory.working === true || creep.memory.target === undefined) {
+                    // Walk around working creeps or idling creeps
+                    matrixValue = 255;
+                } else {
+                    // Walk through creeps with a job, but not working (AKA traveling)
+                    const terrainValue = new Room.Terrain(room.name).get(creep.pos.x, creep.pos.y);
+                    // Match the terrain underneath the creep to avoid preferring going under creeps
+                    matrixValue = terrainValue > 0 ? 5 : 1;
+                }
+            } else {
+                // If creep is not ours, we can only walk on it if we are in safe mode
+                if (creep.room.controller && creep.room.controller.safeMode !== undefined) {
+                    const terrainValue = new Room.Terrain(room.name).get(creep.pos.x, creep.pos.y);
+                    matrixValue = terrainValue > 0 ? 5 : 1;
+                } else {
+                    matrixValue = 255;
+                }
+            }
+
+            matrix.set(creep.pos.x, creep.pos.y, matrixValue);
+        });
+
         return matrix;
     }
 

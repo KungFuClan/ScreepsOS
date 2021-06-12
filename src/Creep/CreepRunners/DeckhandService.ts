@@ -15,7 +15,7 @@ export const DeckhandService: ICreepRunner = {
 
         while(Game.creeps[creepName]) {
 
-            const creep = Game.creeps[creepName].safe<Creep>();
+            let creep = Game.creeps[creepName].safe<Creep>();
 
             const working = CreepRepo.GetCreepWorkingStatus(creep);
 
@@ -37,6 +37,7 @@ export const DeckhandService: ICreepRunner = {
                 }
 
                 const target: StructureController = cache[UpgradeTarget]!.safe();
+                CreepRepo.SetCreepMemoryTarget(creep, target.id);
 
                 const moved = CommonCreepHelper.MoveTo(creep, target, 3);
                 if(moved) {
@@ -44,14 +45,17 @@ export const DeckhandService: ICreepRunner = {
                     continue;
                 }
 
-                CreepRepo.SetCreepWorkingStatus(creep, true);
+                CreepRepo.SetCreepWorkingStatus(creep.safe(), true);
 
                 while(creep.store.energy > 0) {
                     creep.upgradeController(target);
                     yield ThreadState.SUSPEND;
+                    creep = creep.safe();
                 }
 
-                CreepRepo.SetCreepWorkingStatus(creep, false);
+                CreepRepo.SetCreepWorkingStatus(creep.safe(), false);
+
+                CreepRepo.SetCreepMemoryTarget(creep, undefined);
 
                 yield ThreadState.SUSPEND;
                 continue;
@@ -73,6 +77,8 @@ export const DeckhandService: ICreepRunner = {
                 }
 
                 const target = cache[EnergyTarget]!.safe();
+                CreepRepo.SetCreepMemoryTarget(creep, target.id);
+
 
                 const moved = CommonCreepHelper.MoveTo(creep, target, 1);
                 if(moved) {
@@ -83,6 +89,7 @@ export const DeckhandService: ICreepRunner = {
                 // TODO handle withdrawing for other structures instead - ideally just mask this as a custom action
                 creep.pickup(target as Resource);
 
+                CreepRepo.SetCreepMemoryTarget(creep, undefined);
                 delete cache[EnergyTarget];
 
                 yield ThreadState.SUSPEND;

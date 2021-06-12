@@ -94,7 +94,7 @@ export class CreepRepo {
      * @param creep The creep we're setting the memory for
      * @param newTarget The target we are setting the memory to
      */
-     public static SetCreepMemoryTarget(creep: Creep, newTarget: Id<RoomObject>): void {
+     public static SetCreepMemoryTarget(creep: Creep, newTarget: Id<RoomObject> | undefined): void {
         creep.memory.target = newTarget;
     }
 }
