@@ -1,4 +1,6 @@
+import { ActionConstants } from "Creep/interfaces/CreepConstants";
 import { CommonCreepHelper } from "common/Helpers/Common_CreepHelper";
+import { CommonStructureHelper } from "common/Helpers/Common_StructureHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
 import { ICreepRunner } from "Creep/interfaces/interfaces";
 import { Logger } from "utils/Logger";
@@ -7,38 +9,69 @@ import { ThreadState } from "OperatingSystem/interfaces";
 
 export const TenderService: ICreepRunner = {
 
-
     *runRole (creepName: string): Generator {
 
         const EnergyTarget = "energyTarget";
         const StoreTarget = "storeTarget";
+        const DropTarget = "dropTarget";
         const cache: StringMap<RoomObject | null> = {}
 
         CreepRepo.SetCreepWorkingStatus(Game.creeps[creepName], true);
 
         while(Game.creeps[creepName]) {
 
-            const creep = Game.creeps[creepName].safe<Creep>();
+            let creep = Game.creeps[creepName].safe<Creep>();
 
             const energyLevel = creep.store.getUsedCapacity();
 
-            Logger.withPrefix('[TenderService]').debug(`Creep is in state: ${creep.name}, ${creep.memory.working}, ${cache[EnergyTarget]}, ${cache[StoreTarget]}`)
+            let action: ActionConstants | undefined;
+            let target: RoomObject | null = null;
+            let range = 0;
 
+            if(energyLevel > 0) {
 
-            if(creep.store.energy > 0) {
-
-                if(!cache[StoreTarget]) {
+                // #region Get Storage Target
+                if(!cache[StoreTarget] || (cache[StoreTarget]?.safe() as StructureStorage).store.getFreeCapacity() === 0) {
                     const closestStruct = CommonCreepHelper.getClosestTargetToFill(creep.safe());
                     if(!closestStruct) {
-                        yield ThreadState.SUSPEND;
-                        continue;
+                        yield ThreadState.RESUME;
+                    } else {
+                        cache[StoreTarget] = closestStruct;
                     }
-                    cache[StoreTarget] = closestStruct;
-                    Logger.withPrefix('[TenderService]').debug(`Target: ${closestStruct}`);
-
                 }
 
-                const target: AnyStoreStructure = cache[StoreTarget]!.safe();
+                if(!action && cache[StoreTarget] !== undefined) {
+                    action = ActionConstants.FILL;
+                    range = 1;
+                    CreepRepo.SetCreepMemoryTarget(creep, cache[StoreTarget]!.id);
+                }
+                // #endregion
+
+                // #region Get Drop Target
+                if(!cache[DropTarget]) {
+                    const closestSpawn = creep.pos.findClosestByRange(FIND_MY_SPAWNS);
+
+                    if(!closestSpawn) {
+                        yield ThreadState.RESUME;
+                    } else {
+                        cache[DropTarget] = closestSpawn;
+                    }
+                }
+
+                if(!action && cache[DropTarget] !== undefined) {
+                    action = ActionConstants.DROP;
+                    range = 1;
+                    CreepRepo.SetCreepMemoryTarget(creep, cache[DropTarget]!.id);
+                }
+                // #endregion
+
+                creep = creep.safe();
+                target = CreepRepo.GetCreepMemoryTarget(creep);
+
+                if(!target || !action) {
+                    yield ThreadState.SUSPEND;
+                    continue;
+                }
 
                 const moved = CommonCreepHelper.MoveTo(creep, target, 1);
                 if(moved) {
@@ -46,59 +79,51 @@ export const TenderService: ICreepRunner = {
                     continue;
                 }
 
-                if(((target.store as GenericStore).getFreeCapacity(RESOURCE_ENERGY) || 0 > 0)) {
-                    creep.transfer(target, RESOURCE_ENERGY);
-                } else {
-                    creep.drop(RESOURCE_ENERGY);
-                }
+                CommonCreepHelper.PerformAction(creep, action, target);
 
-                delete cache[StoreTarget];
-
-                yield ThreadState.SUSPEND;
-                continue;
+                CreepRepo.SetCreepMemoryTarget(creep, undefined);
             }
             else {
 
-                // * Get Energy target loop
-                if(!cache[EnergyTarget]) {
-
+                // #region Get Energy Target
+                if(!cache[EnergyTarget] || CommonStructureHelper.UsedAmount(cache[EnergyTarget]!) < creep.store.getCapacity()) {
                     const newEnergyTarget = CommonCreepHelper.getClosestEnergyTarget(creep.safe());
 
                     if(!newEnergyTarget) {
-                        yield ThreadState.SUSPEND;
-                        continue;
+                        yield ThreadState.RESUME;
+                    } else {
+                        cache[EnergyTarget] = newEnergyTarget;
                     }
-
-                    cache[EnergyTarget] = newEnergyTarget;
-
                 }
 
-                const target = cache[EnergyTarget]!.safe();
+                if(!action && cache[EnergyTarget] !== undefined) {
+                    action = ActionConstants.RETRIEVE;
+                    range = 1;
+                    CreepRepo.SetCreepMemoryTarget(creep.safe(), cache[EnergyTarget]?.id);
+                }
+                // #endregion
 
-                const moved = CommonCreepHelper.MoveTo(creep, target, 1);
-                if(moved) {
-                    Logger.withPrefix('[TenderService]').debug(`CREEP MOVED: ${creep.name}`)
+                creep = creep.safe();
+                target = CreepRepo.GetCreepMemoryTarget(creep);
+
+                if(!target || !action) {
                     yield ThreadState.SUSPEND;
                     continue;
                 }
 
-                // TODO handle withdrawing for other structures instead - ideally just mask this as a custom action
-                creep.pickup(target as Resource);
+                const moved = CommonCreepHelper.MoveTo(creep, target, range);
+                if(moved) {
+                    yield ThreadState.SUSPEND;
+                    continue;
+                }
 
-                delete cache[EnergyTarget]; // TODO memory?
+                CommonCreepHelper.PerformAction(creep, action, target);
 
-                yield ThreadState.SUSPEND;
-                continue;
-
+                CreepRepo.SetCreepMemoryTarget(creep, undefined);
             }
-                // find the mining container to fill from
-                // if near
-                    // get energy from it
-                // if not
-                    // move to it
+
+            yield ThreadState.SUSPEND;
         }
 
-
-        yield ThreadState.SUSPEND;
     }
 }

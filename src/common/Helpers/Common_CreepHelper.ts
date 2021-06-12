@@ -1,21 +1,11 @@
 import { ActionConstants } from "Creep/interfaces/CreepConstants";
 import { BodyArrayModifier } from "Spawn/BodyParts";
+import { CommonStructureHelper } from "./Common_StructureHelper";
 import { InvalidActionTargetError } from "common/errors";
+import { Logger } from "utils/Logger";
 import { PathfindingHelper } from "Pathfinding/PathfindingHelper";
 import { RoomRepo } from "Repositories/RoomRepo";
-
-const StoreStructures = StructureExtension
-|| StructureFactory
-|| StructureLab
-|| StructureLink
-|| StructureNuker
-|| StructurePowerSpawn
-|| StructureSpawn
-|| StructureStorage
-|| StructureTerminal
-|| StructureTower
-|| StructureContainer;
-
+import { StoreStructures } from "common/interfaces";
 
 export class CommonCreepHelper {
 
@@ -93,10 +83,6 @@ export class CommonCreepHelper {
             opts.maxRooms = 1;
         }
 
-        // creep.moveTo(target,
-        //     opts
-        //     );
-
         creep.travelTo(target, opts);
 
         return true;
@@ -119,8 +105,14 @@ export class CommonCreepHelper {
                 throw new InvalidActionTargetError('Structure', target, action);
 
             case ActionConstants.FILL:
+                if(CommonStructureHelper.isStoreStructure(target)) {
+                    return creep.transfer(target as AnyStoreStructure, RESOURCE_ENERGY); // TODO fix this into multiple methods, one for energy and one for specialized or some simliar thing
+                }
+                throw new InvalidActionTargetError('StoreStructure', target, action);
+
+            case ActionConstants.DROP:
                 if(target instanceof StoreStructures) {
-                    return creep.transfer(target, RESOURCE_ENERGY); // TODO fix this into multiple methods, one for energy and one for specialized or some simliar thing
+                    return creep.drop(RESOURCE_ENERGY);
                 }
                 throw new InvalidActionTargetError('StoreStructure', target, action);
 
@@ -128,7 +120,7 @@ export class CommonCreepHelper {
                 if(target instanceof Resource) {
                     return creep.pickup(target);
                 }
-                if(target instanceof StoreStructures || Ruin || Tombstone) {
+                if(CommonStructureHelper.isStoreStructure(target) || target instanceof Ruin || target instanceof Tombstone) {
                     return creep.withdraw(target as StructureStorage, RESOURCE_ENERGY);
                 }
                 throw new InvalidActionTargetError('StoreStructure', target, action);

@@ -15,3 +15,15 @@ export abstract class IService {
     public static mainThreadName: string;
     public static run: GeneratorCreator;
 }
+
+export const StoreStructures = StructureExtension
+|| StructureFactory
+|| StructureLab
+|| StructureLink
+|| StructureNuker
+|| StructurePowerSpawn
+|| StructureSpawn
+|| StructureStorage
+|| StructureTerminal
+|| StructureTower
+|| StructureContainer;

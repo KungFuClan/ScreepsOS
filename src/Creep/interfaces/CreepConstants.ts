@@ -7,9 +7,11 @@ export enum RoleConstants {
 };
 
 export enum ActionConstants {
-    RETRIEVE = 0,
-    UPGRADE = 1,
-    FILL = 2,
-    BUILD = 3,
-    REPAIR = 4
+    NONE = 0,
+    RETRIEVE = 1,
+    UPGRADE = 2,
+    FILL = 3,
+    BUILD = 4,
+    REPAIR = 5,
+    DROP = 6
 }

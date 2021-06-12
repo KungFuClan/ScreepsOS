@@ -1,5 +1,6 @@
 import { ActionConstants } from "Creep/interfaces/CreepConstants";
 import { CommonCreepHelper } from "common/Helpers/Common_CreepHelper";
+import { CommonStructureHelper } from "common/Helpers/Common_StructureHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
 import { ICreepRunner } from "Creep/interfaces/interfaces";
 import { Logger } from "utils/Logger";
@@ -12,6 +13,7 @@ export const DeckhandService: ICreepRunner = {
 
         const EnergyTarget = "energyTarget";
         const UpgradeTarget = "upgradeTarget";
+        const BuildTarget = "buildTarget";
         const cache: StringMap<RoomObject | null> = {}
 
         while(Game.creeps[creepName]) {
@@ -22,42 +24,48 @@ export const DeckhandService: ICreepRunner = {
 
             const energyLevel = creep.store.getUsedCapacity();
 
+            let action: ActionConstants | undefined;
+            let target: RoomObject | null;
+            let range = 0;
+
             if(energyLevel > 0) {
 
-                let action: ActionConstants | undefined;
+                // if(!cache[BuildTarget]) {
+
+                // }
+
 
                 if(!cache[UpgradeTarget]) {
 
                     const controller = Game.rooms[creep.memory.targetRoom].controller;
-
                     if(!controller) {
-                        Logger.withPrefix('[DeckhandService]').error(`Assigned a target room with no controller: ${creep.name}`);
-                        yield ThreadState.SUSPEND;
-                        continue;
+                        yield ThreadState.RESUME;
+                    } else {
+                        cache[UpgradeTarget] = controller;
                     }
-
-                    cache[UpgradeTarget] = controller;
                 }
-                if(!action) {
+
+                if(!action && cache[UpgradeTarget] !== undefined) {
                     CreepRepo.SetCreepMemoryTarget(creep, cache[UpgradeTarget]?.safe().id);
                     action = ActionConstants.UPGRADE;
+                    range = 3;
                 }
 
+                creep = creep.safe();
+                target = CreepRepo.GetCreepMemoryTarget(creep);
 
-                const target = CreepRepo.GetCreepMemoryTarget(creep);
-
-                if(!target) {
+                if(!target || !action) {
                     yield ThreadState.SUSPEND;
                     continue;
                 }
 
-                const moved = CommonCreepHelper.MoveTo(creep, target, 3);
+                const moved = CommonCreepHelper.MoveTo(creep, target, range);
                 if(moved) {
                     yield ThreadState.SUSPEND;
                     continue;
                 }
 
-                CreepRepo.SetCreepWorkingStatus(creep.safe(), true);
+                CreepRepo.SetCreepWorkingStatus(creep, true);
 
                 while(creep.store.energy > 0) {
                     CommonCreepHelper.PerformAction(creep, action, target);
@@ -65,49 +73,51 @@ export const DeckhandService: ICreepRunner = {
                     creep = creep.safe();
                 }
 
-                CreepRepo.SetCreepWorkingStatus(creep.safe(), false);
+                CreepRepo.SetCreepWorkingStatus(creep, false);
 
                 CreepRepo.SetCreepMemoryTarget(creep, undefined);
 
-                yield ThreadState.SUSPEND;
-                continue;
             }
             else {
 
-                // * Get Energy target loop
-                if(!cache[EnergyTarget]) {
+                // #region Get Energy Target
+                if(!cache[EnergyTarget] || CommonStructureHelper.UsedAmount(cache[EnergyTarget]!) < creep.store.getCapacity()) {
 
                     const newEnergyTarget = CommonCreepHelper.getClosestEnergyTarget(creep.safe());
-
                     if(!newEnergyTarget) {
-                        yield ThreadState.SUSPEND;
-                        continue;
+                        yield ThreadState.RESUME;
+                    } else {
+                        cache[EnergyTarget] = newEnergyTarget;
                     }
-
-                    cache[EnergyTarget] = newEnergyTarget;
-
                 }
 
-                const target = cache[EnergyTarget]!.safe();
-                CreepRepo.SetCreepMemoryTarget(creep, target.id);
+                if(!action && cache[EnergyTarget] !== undefined) {
+                    CreepRepo.SetCreepMemoryTarget(creep.safe(), cache[EnergyTarget]?.safe().id);
+                    range = 1;
+                    action = ActionConstants.RETRIEVE;
+                }
+                // #endregion
 
+                creep = creep.safe();
+                target = CreepRepo.GetCreepMemoryTarget(creep);
 
-                const moved = CommonCreepHelper.MoveTo(creep, target, 1);
+                if(!target || !action) {
+                    yield ThreadState.SUSPEND;
+                    continue;
+                }
+
+                const moved = CommonCreepHelper.MoveTo(creep, target, range);
                 if(moved) {
                     yield ThreadState.SUSPEND;
                     continue;
                 }
 
-                // TODO handle withdrawing for other structures instead - ideally just mask this as a custom action
-                creep.pickup(target as Resource);
+                CommonCreepHelper.PerformAction(creep, ActionConstants.RETRIEVE, target);
 
                 CreepRepo.SetCreepMemoryTarget(creep, undefined);
-                delete cache[EnergyTarget];
-
-                yield ThreadState.SUSPEND;
-                continue;
 
             }
+            yield ThreadState.SUSPEND;
         }
     }
 }
