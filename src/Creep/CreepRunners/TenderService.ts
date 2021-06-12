@@ -1,11 +1,8 @@
 import { CommonCreepHelper } from "common/Helpers/Common_CreepHelper";
-import { CommonRoomHelper } from "common/Helpers/Common_RoomHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
 import { ICreepRunner } from "Creep/interfaces/interfaces";
-import { RoomRepo } from "Repositories/RoomRepo";
 import { StringMap } from "common/interfaces";
 import { ThreadState } from "OperatingSystem/interfaces";
-import { fill } from "lodash";
 
 export const TenderService: ICreepRunner = {
 
