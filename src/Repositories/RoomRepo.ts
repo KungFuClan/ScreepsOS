@@ -40,4 +40,13 @@ export class RoomRepo {
         return room.find(FIND_MY_STRUCTURES).filter(struct => fillableStructures.includes(struct.structureType)); // && (struct as AnyStoreStructure).store.getFreeCapacity<RESOURCE_ENERGY>(RESOURCE_ENERGY) > 0);
 
     }
+
+    public static GetConstructionSites_ByRoom(roomName: string): ConstructionSite[] {
+        const room = Game.rooms[roomName];
+        if(!room) {
+            return [];
+        }
+
+        return room.find(FIND_CONSTRUCTION_SITES);
+    }
 }

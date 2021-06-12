@@ -69,6 +69,21 @@ export class CommonCreepHelper {
         return closestStruct;
     }
 
+    public static getClosestConstructionSite(creep: Creep): ConstructionSite | undefined{
+        const constSites = RoomRepo.GetConstructionSites_ByRoom(creep.room.name);
+
+        if(constSites.length === 0) {
+            return;
+        }
+
+        const closestSite = creep.pos.findClosestByRange(constSites);
+
+        if(!closestSite){
+            return;
+        }
+
+        return closestSite;
+    }
     public static MoveTo(creep: Creep, target: _HasRoomPosition, targetRange = 0): boolean {
 
         const range = creep.pos.getRangeTo(target);

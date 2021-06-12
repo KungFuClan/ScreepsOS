@@ -4,6 +4,7 @@ import { CommonStructureHelper } from "common/Helpers/Common_StructureHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
 import { ICreepRunner } from "Creep/interfaces/interfaces";
 import { Logger } from "utils/Logger";
+import { RoomRepo } from "Repositories/RoomRepo";
 import {StringMap} from "common/interfaces";
 import {ThreadState} from "OperatingSystem/interfaces";
 
@@ -30,10 +31,20 @@ export const DeckhandService: ICreepRunner = {
 
             if(energyLevel > 0) {
 
-                // if(!cache[BuildTarget]) {
+                if(!cache[BuildTarget]) {
+                    const closestSite = CommonCreepHelper.getClosestConstructionSite(creep);
 
-                // }
-
+                    if(!closestSite) {
+                        yield ThreadState.RESUME;
+                    } else {
+                        cache[BuildTarget] = closestSite;
+                    }
+                }
+                if(!action && cache[BuildTarget] !== undefined) {
+                    CreepRepo.SetCreepMemoryTarget(creep, cache[BuildTarget]?.id);
+                    range = 3;
+                    action = ActionConstants.BUILD;
+                }
 
                 if(!cache[UpgradeTarget]) {
 
@@ -44,7 +55,6 @@ export const DeckhandService: ICreepRunner = {
                         cache[UpgradeTarget] = controller;
                     }
                 }
-
                 if(!action && cache[UpgradeTarget] !== undefined) {
                     CreepRepo.SetCreepMemoryTarget(creep, cache[UpgradeTarget]?.safe().id);
                     action = ActionConstants.UPGRADE;
