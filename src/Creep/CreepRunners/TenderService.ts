@@ -1,3 +1,5 @@
+import { CommonCreepHelper } from "common/Helpers/Common_CreepHelper";
+import { CommonRoomHelper } from "common/Helpers/Common_RoomHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
 import { ICreepRunner } from "Creep/interfaces/interfaces";
 import { RoomRepo } from "Repositories/RoomRepo";
@@ -31,85 +33,59 @@ export const TenderService: ICreepRunner = {
 
                 if(!cache[StoreTarget]) {
 
-                    const fillStructs = RoomRepo.GetStructuresNeedingFilled_ByRoom(creep.room.name);
-
-                    if(fillStructs.length === 0) {
-                        yield ThreadState.SUSPEND;
-                        continue;
-                    }
-
-                    const closestStruct = creep.pos.findClosestByRange(fillStructs);
-
+                    const closestStruct = CommonCreepHelper.getClosestTargetToFill(creep.safe());
                     if(!closestStruct) {
                         yield ThreadState.SUSPEND;
                         continue;
                     }
-
                     cache[StoreTarget] = closestStruct;
 
                 }
 
                 const target: AnyStoreStructure = cache[StoreTarget]!.safe();
 
-                const range = creep.pos.getRangeTo(target);
-                if(range === 1) {
-                    if((target as StructureSpawn).store.getFreeCapacity()! > 0) {
-                        creep.transfer(target, RESOURCE_ENERGY);
-                    } else {
-                        creep.drop(RESOURCE_ENERGY);
-                    }
+                const moved = CommonCreepHelper.MoveTo(creep, target, 1);
+                if(moved) {
                     yield ThreadState.SUSPEND;
                     continue;
                 }
 
-                creep.moveTo(target, {
-                    ignoreCreeps: false,
-                    visualizePathStyle: { lineStyle: "dashed", opacity: .5}
-                });
+                if((target.store as GenericStore).getFreeCapacity()! > 0) {
+                    creep.transfer(target, RESOURCE_ENERGY);
+                } else {
+                    creep.drop(RESOURCE_ENERGY);
+                }
 
                 yield ThreadState.SUSPEND;
                 continue;
-
-                // find storage/spawn
-                // if near
-                    // deposit/drop on ground
-                // if not
-                    // move to it
             }
             else {
 
                 // * Get Energy target loop
                 if(!cache[EnergyTarget]) {
 
-                    const acceptableEnergyDrops = RoomRepo.GetAllDroppedResources_ByRoom(creep.room.name, RESOURCE_ENERGY).filter(drop => drop.amount >= creep.store.getFreeCapacity());
+                    const newEnergyTarget = CommonCreepHelper.getClosestEnergyTarget(creep.safe());
 
-                    if(acceptableEnergyDrops.length === 0) {
+                    if(!newEnergyTarget) {
                         yield ThreadState.SUSPEND;
                         continue;
                     }
 
-                    const closestEnergyToPickup = creep.pos.findClosestByRange(acceptableEnergyDrops);
+                    cache[EnergyTarget] = newEnergyTarget;
 
-                    if(!closestEnergyToPickup){
-                        yield ThreadState.SUSPEND;
-                        continue;
-                    }
-
-                    cache[EnergyTarget] = closestEnergyToPickup
                 }
 
                 const target = cache[EnergyTarget]!.safe();
 
-                const range = creep.pos.getRangeTo(target);
-                if(range === 1) {
-                    creep.pickup(target as Resource)
+                const moved = CommonCreepHelper.MoveTo(creep, target, 1);
+                if(moved) {
+                    yield ThreadState.SUSPEND;
                     continue;
                 }
 
-                creep.moveTo(target, {
-                    ignoreCreeps: false,
-                    visualizePathStyle: { lineStyle: "dashed", opacity: .25}
-                });
+                // TODO handle withdrawing for other structures instead - ideally just mask this as a custom action
+                creep.pickup(target as Resource);
+
                 yield ThreadState.SUSPEND;
                 continue;
 

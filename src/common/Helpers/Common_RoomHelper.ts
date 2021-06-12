@@ -1,4 +1,6 @@
 import { EnergyTier } from "Spawn/interfaces";
+import { RoomRepo } from "Repositories/RoomRepo";
+import { ThreadState } from "OperatingSystem/interfaces";
 
 export class CommonRoomHelper {
 
@@ -51,4 +53,5 @@ export class CommonRoomHelper {
         }
 
     }
+
 }
