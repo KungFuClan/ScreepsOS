@@ -5,3 +5,11 @@ export enum RoleConstants {
     CAPTAIN = "captain",
     QUEEN = "queen"
 };
+
+export enum ActionConstants {
+    RETRIEVE = 0,
+    UPGRADE = 1,
+    FILL = 2,
+    BUILD = 3,
+    REPAIR = 4
+}

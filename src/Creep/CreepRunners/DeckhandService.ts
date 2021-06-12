@@ -1,3 +1,4 @@
+import { ActionConstants } from "Creep/interfaces/CreepConstants";
 import { CommonCreepHelper } from "common/Helpers/Common_CreepHelper";
 import { CreepRepo } from "Repositories/CreepRepo";
 import { ICreepRunner } from "Creep/interfaces/interfaces";
@@ -23,6 +24,8 @@ export const DeckhandService: ICreepRunner = {
 
             if(energyLevel > 0) {
 
+                let action: ActionConstants | undefined;
+
                 if(!cache[UpgradeTarget]) {
 
                     const controller = Game.rooms[creep.memory.targetRoom].controller;
@@ -35,9 +38,18 @@ export const DeckhandService: ICreepRunner = {
 
                     cache[UpgradeTarget] = controller;
                 }
+                if(!action) {
+                    CreepRepo.SetCreepMemoryTarget(creep, cache[UpgradeTarget]?.safe().id);
+                    action = ActionConstants.UPGRADE;
+                }
 
-                const target: StructureController = cache[UpgradeTarget]!.safe();
-                CreepRepo.SetCreepMemoryTarget(creep, target.id);
+
+                const target = CreepRepo.GetCreepMemoryTarget(creep);
+
+                if(!target) {
+                    yield ThreadState.SUSPEND;
+                    continue;
+                }
 
                 const moved = CommonCreepHelper.MoveTo(creep, target, 3);
                 if(moved) {
@@ -48,7 +60,7 @@ export const DeckhandService: ICreepRunner = {
                 CreepRepo.SetCreepWorkingStatus(creep.safe(), true);
 
                 while(creep.store.energy > 0) {
-                    creep.upgradeController(target);
+                    CommonCreepHelper.PerformAction(creep, action, target);
                     yield ThreadState.SUSPEND;
                     creep = creep.safe();
                 }
