@@ -1,6 +1,7 @@
 import { Priority, SpawnQueueObject } from "Spawn/interfaces";
 
 import { BodyPartsUtil } from "Spawn/BodyParts";
+import { Logger } from "utils/Logger";
 import { Thread } from "OperatingSystem/thread";
 import { ThreadState } from "OperatingSystem/interfaces";
 import { spawnQueue } from "Spawn/SpawnQueue/SpawnQueue";
@@ -64,14 +65,21 @@ function * runSpawn(spawn: StructureSpawn, energyAvailable: number): Generator<b
 
 function getNextReqToSpawn(roomName: string, priority: Priority, energyAvailable: number): SpawnQueueObject | undefined {
 
-    for(const req of spawnQueue) {
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for(let i = spawnQueue.length-1; i >= 0; i--) {
+        const req = spawnQueue.spawnQueue[i];
 
         if(req.requestingRoom !== roomName) continue;
         if(req.priority !== priority) continue;
 
+
         const costToSpawn = BodyPartsUtil.getPartsArrayCost(req.body)
+        Logger.withPrefix('spawntest').info(JSON.stringify(req));
         if(costToSpawn <= energyAvailable) {
+            Logger.withPrefix('spawntested').alert(`Spawning ${JSON.stringify(req)}`)
             return req;
+        } else {
+            return undefined;
         }
     }
 

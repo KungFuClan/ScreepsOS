@@ -1,5 +1,5 @@
 import { BodyArrayStyle, BodyPartsUtil } from "Spawn/BodyParts";
-import { SpawnQueueObject, SpawningOptions } from "../interfaces";
+import { Priority, SpawnQueueObject, SpawningOptions } from "../interfaces";
 
 import { CreepRepo } from "Repositories/CreepRepo";
 import { DeckhandBuilder } from "Creep/CreepBuilders/DeckhandBuilderService";
@@ -42,7 +42,7 @@ function queueMiners(roomName: string, spawnOptions: SpawningOptions = {}): void
 
         const numCreepsNeeded = Math.ceil(workPartsNeeded / bodyDefinition[WORK]!);
 
-        let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.MINER]).length > 0 ? spawnOptions.priority || 2 : 1;
+        let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.MINER]).length > 0 ? spawnOptions.priority || Priority.NORMAL : Priority.HIGH;
         const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.GROUPED, []);
 
         for(let i = 0; i < numCreepsNeeded; i++) {
@@ -65,7 +65,7 @@ function queueMiners(roomName: string, spawnOptions: SpawningOptions = {}): void
 
             spawnQueue.unshift(newSpawn);
 
-            priority = spawnOptions.priority || 2; // So that only the first of the creeps will be priority 1, unless specified
+            priority = spawnOptions.priority || Priority.NORMAL; // So that only the first of the creeps will be priority 1, unless specified
 
         }
 }
@@ -82,7 +82,7 @@ function queueTenders(roomName: string, spawnOptions: SpawningOptions = {}): voi
 
     const numCreepsNeeded = Math.ceil(carryPartsNeeded / bodyDefinition[CARRY]!);
 
-    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.TENDER]).length > 0 ? spawnOptions.priority || 2 : 1;
+    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.TENDER]).length > 0 ? spawnOptions.priority || Priority.NORMAL : Priority.HIGH;
     const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.GROUPED, []);
 
     for(let i = 0; i < numCreepsNeeded; i++) {
@@ -105,7 +105,7 @@ function queueTenders(roomName: string, spawnOptions: SpawningOptions = {}): voi
 
         spawnQueue.unshift(newSpawn);
 
-        priority = spawnOptions.priority || 2; // So that only the first of the creeps will be priority 1 ever
+        priority = spawnOptions.priority || Priority.NORMAL; // So that only the first of the creeps will be priority 1 ever
 
     }
 }
@@ -123,7 +123,7 @@ function queueDeckhands(roomName: string, spawnOptions: SpawningOptions = {}): v
 
     const numCreepsNeeded = Math.ceil(workPartsNeeded / bodyDefinition[WORK]!);
 
-    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.DECKHAND]).length > 0 ? spawnOptions.priority || 2 : 1;
+    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.DECKHAND]).length > 0 ? spawnOptions.priority || Priority.NORMAL : Priority.HIGH;
 
     const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.COLLATED, []);
 
@@ -144,6 +144,6 @@ function queueDeckhands(roomName: string, spawnOptions: SpawningOptions = {}): v
 
         spawnQueue.unshift(newSpawn);
 
-        priority = spawnOptions.priority || 2;
+        priority = spawnOptions.priority || Priority.NORMAL;
     }
 }
