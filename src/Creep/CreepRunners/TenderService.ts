@@ -68,10 +68,13 @@ export const TenderService: ICreepRunner = {
                 creep = creep.safe();
                 target = CreepRepo.GetCreepMemoryTarget(creep);
 
+                Logger.withPrefix('[TenderService]').warn(`Cache: ${cache[StoreTarget]} || ${cache[DropTarget]}, action: ${action}, memoryTarget: ${CreepRepo.GetCreepMemoryTarget(creep)}`)
+
                 if(!target || !action) {
                     yield ThreadState.SUSPEND;
                     continue;
                 }
+
 
                 const moved = CommonCreepHelper.MoveTo(creep, target, 1);
                 if(moved) {
@@ -86,7 +89,7 @@ export const TenderService: ICreepRunner = {
             else {
 
                 // #region Get Energy Target
-                if(!cache[EnergyTarget] || CommonStructureHelper.UsedAmount(cache[EnergyTarget]!) < creep.store.getCapacity()) {
+                if(cache[EnergyTarget] === undefined || CommonStructureHelper.UsedAmount(cache[EnergyTarget]!.safe()) < creep.store.getCapacity()) {
                     const newEnergyTarget = CommonCreepHelper.getClosestEnergyTarget(creep.safe());
 
                     if(!newEnergyTarget) {
@@ -102,6 +105,8 @@ export const TenderService: ICreepRunner = {
                     CreepRepo.SetCreepMemoryTarget(creep.safe(), cache[EnergyTarget]?.id);
                 }
                 // #endregion
+
+                Logger.withPrefix('[TenderService]').warn(`Cache: ${cache[EnergyTarget]}, action: ${action}, memoryTarget: ${CreepRepo.GetCreepMemoryTarget(creep)}`)
 
                 creep = creep.safe();
                 target = CreepRepo.GetCreepMemoryTarget(creep);

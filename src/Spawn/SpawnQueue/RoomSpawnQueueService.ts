@@ -1,5 +1,5 @@
 import { BodyArrayStyle, BodyPartsUtil } from "Spawn/BodyParts";
-import { Priority, SpawnQueueObject, SpawningOptions } from "../interfaces";
+import { EnergyTier, Priority, SpawnQueueObject, SpawningOptions } from "../interfaces";
 
 import { CreepRepo } from "Repositories/CreepRepo";
 import { DeckhandBuilder } from "Creep/CreepBuilders/DeckhandBuilderService";
@@ -38,11 +38,19 @@ function queueMiners(roomName: string, spawnOptions: SpawningOptions = {}): void
             return;
         }
 
+        const numCreepsExisting = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.MINER]).length;
+
+        let priority = spawnOptions.priority || Priority.NORMAL;
+
+        if(numCreepsExisting === 0) {
+            spawnOptions.energyTier = EnergyTier.T1;
+            priority = Priority.HIGH;
+        }
+
         const bodyDefinition = MinerBuilder.runBuilder(roomName, spawnOptions);
 
         const numCreepsNeeded = Math.ceil(workPartsNeeded / bodyDefinition[WORK]!);
 
-        let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.MINER]).length > 0 ? spawnOptions.priority || Priority.NORMAL : Priority.HIGH;
         const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.GROUPED, []);
 
         for(let i = 0; i < numCreepsNeeded; i++) {
@@ -78,11 +86,19 @@ function queueTenders(roomName: string, spawnOptions: SpawningOptions = {}): voi
         return;
     }
 
+    const numCreepsExisting = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.TENDER]).length;
+
+    let priority = spawnOptions.priority || Priority.NORMAL;
+
+    if(numCreepsExisting === 0) {
+        spawnOptions.energyTier = EnergyTier.T1;
+        priority = Priority.HIGH;
+    }
+
     const bodyDefinition = TenderBuilder.runBuilder(roomName, spawnOptions);
 
     const numCreepsNeeded = Math.ceil(carryPartsNeeded / bodyDefinition[CARRY]!);
 
-    let priority = CreepRepo.GetCreeps_My_ByRoles([RoleConstants.TENDER]).length > 0 ? spawnOptions.priority || Priority.NORMAL : Priority.HIGH;
     const body = BodyPartsUtil.getPartsArray(bodyDefinition, BodyArrayStyle.GROUPED, []);
 
     for(let i = 0; i < numCreepsNeeded; i++) {
@@ -113,7 +129,7 @@ function queueTenders(roomName: string, spawnOptions: SpawningOptions = {}): voi
 function queueDeckhands(roomName: string, spawnOptions: SpawningOptions = {}): void {
 
     // TODO How do we want to target controller upgrade % / builders needed
-    const workPartsNeeded = 10 - SpawnQueueHelper.GetExistingRoleParts(roomName, RoleConstants.DECKHAND, WORK) - SpawnQueueHelper.GetQueuedRoleParts(roomName, RoleConstants.DECKHAND, WORK);
+    const workPartsNeeded = 5 - SpawnQueueHelper.GetExistingRoleParts(roomName, RoleConstants.DECKHAND, WORK) - SpawnQueueHelper.GetQueuedRoleParts(roomName, RoleConstants.DECKHAND, WORK);
 
     if(workPartsNeeded === 0) {
         return;
